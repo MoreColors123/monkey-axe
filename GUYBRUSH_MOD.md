@@ -96,8 +96,8 @@ Inkscape's bundled build, already has both).
 | Golden Axe animation | Guybrush source |
 | --- | --- |
 | `idle`, `stunned_*`, `stand_up`, mounted | front standing |
-| `walking_down` | front-facing walk |
-| `walking_up` | back-facing walk |
+| `walking_down` | front-facing walk (sheet row 1) |
+| `walking_up` | back-facing walk (sheet row 2) |
 | `running`, `running_attack` | side-view walk |
 | `attack_1..7`, `attack_short`, `grab_and_throw` | forward point/punch |
 | `attack_special` | raised cutlass |
