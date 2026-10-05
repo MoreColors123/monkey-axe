@@ -237,9 +237,48 @@ A red error banner appears at the top if the page throws.
   table if this matters.
 * All `mounted_*` states use the plain standing pose (no mounted art exists).
 * `magic` uses an arms-up pose; magic effects themselves are unchanged (Ax's volcano).
+
+### Single-frame animations (inherited from the remake)
+
+Several animations have exactly **one** sprite line in Ax's layout, and
+`guybrush_threepwood.char` is a byte-for-byte copy of it, so Guybrush inherits
+the same counts. Counted across the vanilla characters:
+
+| Animation | Ax | Gilius | Tyris | Guybrush |
+| --- | --- | --- | --- | --- |
+| `running_attack` | 1 | 1 | 1 | 1 |
+| `jumping_attack` | 1 | 1 | 1 | 1 |
+| `jumping_death_stab` | 1 | 1 | 1 | 1 |
+| `stand_up` | 1 | 3 | 1 | 1 |
+| `mounting`, `mounted_side/_flip`, `mounted_down/_flip`, `mounted_up/_flip` | 1 | 1 | 1 | 1 |
+| `resting`, `dead` | 1 | 1 | 1 | 1 |
+
+These poses are **held for a code-timed window**, not animated frame-by-frame:
+
+* `running_attack` — `Actor.Running.fixedUpdate` (~line 1527) sets it once,
+  applies `vy = -3.0` and a boosted `vx`, and holds the pose for the whole lunge
+  until `vy == 0` (then it switches back to `walking`).
+* `jumping_attack` — `Actor.Jumping.fixedUpdate` (~line 1582) shows it for
+  ~90 ms, then switches to `jumping_death_stab` (if running) or back to `jumping`.
+* `jumping_death_stab` — a single held pose.
+
+To animate any of these you must **add frames to the layout**. Note this is a
+design decision, because `build_atlas.py` currently parses `ax_battler.char` as
+the frame layout and writes `guybrush_threepwood.char` as a copy of it:
+
+1. Add extra `sprite <anim> RIGHT x y w h cx cy` lines using NEW rectangles in
+   unused atlas space, plus optional `collider ATTACK ...` for the new frames.
+   (The current `running_attack` rectangle already has an attack box at
+   `(269,210,9,48)`.)
+2. Give the baker a layout source that can carry those extra frames — e.g. a
+   hand-maintained `guybrush_layout.char` template read instead of Ax's `.char`.
+3. Add the new art rectangles to `mapping.json` so the reviewer can pick them.
+
+Do **not** edit `ax_battler.char` for this; that would change the vanilla
+character. Nothing here is required for the mod to work — it is purely a
+fidelity improvement.
 * The reviewer only previews the RIGHT direction; the engine mirrors for LEFT
   (`Sprite.draw` flips), so that's usually fine.
-* `jumping_attack`/`running_attack` have only 1 game frame in the `.char`.
 * Select-screen name is `GUYBRUSH` (rendered by the bitmap font).
 
 ---

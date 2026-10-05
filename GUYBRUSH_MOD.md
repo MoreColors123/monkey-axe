@@ -152,3 +152,8 @@ tools/guybrush/patch_select.py                    (swap the select portrait)
   inside the existing frame rectangles without clipping.
 * Colliders/points are inherited unchanged from Ax Battler, so reach and grab
   points are approximately where the original character had them.
+* Several special poses are single-frame in the original remake and therefore
+  here too — `running_attack`, `jumping_attack`, `jumping_death_stab`,
+  `stand_up`, `mounting`/`mounted_*`, `resting`, `dead`. They are held for a
+  code-timed window rather than animated. See `HANDOFF.md` for why and how to
+  add frames if you want them animated.
