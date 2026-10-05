@@ -3,6 +3,10 @@
 Replaces **Ax Battler** with **Guybrush Threepwood** (Monkey Island 2: LeChuck's
 Revenge) as a playable character in this Golden Axe remake.
 
+> Building on / continuing this work? See **[HANDOFF.md](HANDOFF.md)** for the
+> full technical handoff (engine internals, tool pipeline, mapping schema,
+> known issues, verification steps).
+
 Guybrush now appears:
 
 * on the **SELECT PLAYER** screen (avatar + name `GUYBRUSH`),
