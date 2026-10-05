@@ -210,6 +210,7 @@ function animFrames(anim){
   return {e, ids: ids.slice()};
 }
 function drawFrameSprite(ctx, sp, gf, mode, base, ax, ay){
+  if (!imgSource || !sp) return; // sheet may not have loaded yet
   // mirrors build_atlas.fit_scale: "center" fits the frame, "bottom" keeps a
   // constant size and clips wide poses instead of shrinking the character.
   let s;
