@@ -43,7 +43,8 @@ Double-click **`ReviewSprites.bat`** in the repo root. It builds and opens
 * the right side lists every Golden Axe animation. Pick one to see a live
   filmstrip preview and a **play/pause animated preview** that plays at the
   animation's real speed (the `fps` box defaults to the speed from the `.char`
-  and can be overridden for previewing);
+  and can be overridden for previewing). One-shot animations hold their last
+  frame like the game does — tick **loop preview** to make them repeat;
 * assign sprites with **+ append selected sprite** / **replace frames with
   selected**, click a thumbnail to set that frame, and reorder with the arrows;
 * tune **mode** (`bottom` = feet on the ground, `center` = lying) and an optional

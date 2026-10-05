@@ -205,7 +205,9 @@ embedded as data URIs. Controls:
   to set that frame, `◀ ▶` reorder, `✕` remove.
 * `mode` / per-animation `scale`.
 * **Animated preview** plays at the animation's real speed (`fps` defaults to
-  `animation_speed * 60`, overridable).
+  `animation_speed * 60`, overridable). One-shot animations hold their last
+  frame exactly like in-game; tick **loop preview** to make every animation
+  repeat while reviewing, and use **Replay** to restart one-shot clips.
 * **Undo** (one action), **Reset section** (current animation), **Reset all**.
   "Last state" = last exported/loaded mapping; changed sections show `*`.
 * **Export mapping.json** downloads the file — save it over

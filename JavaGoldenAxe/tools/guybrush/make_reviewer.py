@@ -162,7 +162,8 @@ TEMPLATE = r"""<!doctype html>
       <div class="row">
         <canvas id="animprev" width="260" height="150"></canvas>
         <div>
-          <div><button id="play">Pause</button> <label>fps <input id="fps" type="number" step="0.5" style="width:70px"></label></div>
+          <div><button id="play">Pause</button> <button id="replay">Replay</button> <label>fps <input id="fps" type="number" step="0.5" style="width:70px"></label></div>
+          <div class="row" style="margin:4px 0"><label><input id="forceloop" type="checkbox" checked> loop preview</label></div>
           <div class="hint" id="animmeta"></div>
           <div class="hint">animated at the animation's real speed</div>
         </div>
@@ -411,7 +412,10 @@ function tick(now){
     const n = (DATA.ga[selAnim]||[]).length;
     if (n > 0){
       animT += dt * currentFps();
-      const loop = DATA.loop[selAnim] === true;
+      // force-loop in the preview; otherwise follow the animation's real
+      // loop flag (one-shots hold their last frame, like in game).
+      const loop = document.getElementById('forceloop').checked
+                || DATA.loop[selAnim] === true;
       if (animT >= n){ animT = loop ? (animT % n) : n - 0.0001; }
     }
   }
@@ -461,6 +465,10 @@ document.getElementById('resetsection').onclick = resetSection;
 document.getElementById('play').onclick = () => {
   playing = !playing;
   document.getElementById('play').textContent = playing ? 'Pause' : 'Play';
+};
+document.getElementById('replay').onclick = () => {
+  animT = 0; playing = true;
+  document.getElementById('play').textContent = 'Pause';
 };
 document.getElementById('gscale').onchange = e => { const v=parseFloat(e.target.value); if(!isNaN(v)){pushHistory(); mapping.global_scale=v; refresh();} };
 document.getElementById('export').onclick = () => {
