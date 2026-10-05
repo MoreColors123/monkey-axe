@@ -2251,7 +2251,7 @@ public class Actor extends Entity implements Comparable<Actor> {
             super("using_magic");
             availableMagics = new Magic[playerCharacter.maxPotions];
             switch (playerCharacter) {
-                case AX ->{
+                case GUYBRUSH ->{
                     Magic magicA = new VolcanoABC(stage, Actor.this, VOLCANO_A);
                     Magic magicB = new VolcanoABC(stage, Actor.this, VOLCANO_B);
                     Magic magicC = new VolcanoABC(stage, Actor.this, VOLCANO_C);

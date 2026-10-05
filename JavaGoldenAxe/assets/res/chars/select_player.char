@@ -6,7 +6,7 @@ shadow false
 
 additive_blend false
 
-sprite ax RIGHT 571 13 32 64 16 60
+sprite guybrush RIGHT 571 13 32 64 16 60
 sprite gilius RIGHT 611 16 45 54 29 50
 sprite tyris RIGHT 669 13 29 62 15 58
 

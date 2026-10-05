@@ -27,7 +27,7 @@ add_actor ending dragon_red dragon_red default
 add_actor ending dragon_blue dragon_blue default
 add_actor ending thief_blue thief_potion null
 add_actor ending thief_green thief_food null
-add_actor ending ax ax_battler null
+add_actor ending ax guybrush_threepwood null
 add_actor ending tyris tyris_flare null
 add_actor ending gilius gilius_thunderhead null
 

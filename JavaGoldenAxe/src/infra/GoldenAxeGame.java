@@ -38,7 +38,7 @@ public class GoldenAxeGame {
     
     public static int introIndex = 0;
     public static boolean showingDemo = false;
-    public static PlayerCharacter demoCharacter = AX;
+    public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;
     

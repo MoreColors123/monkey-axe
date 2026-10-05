@@ -142,7 +142,7 @@ public class SelectPlayer extends State<GoldenAxeGame, SceneManager> {
         
         animationPlayer = Resource.getAnimationPlayer("select_player", null);
         avatarsById = new Avatar[3];
-        avatars.add(avatarsById[0] = new Avatar(AX, Math.toRadians(90)));
+        avatars.add(avatarsById[0] = new Avatar(GUYBRUSH, Math.toRadians(90)));
         avatars.add(avatarsById[1] = new Avatar(TYRIS, Math.toRadians(330)));
         avatars.add(avatarsById[2] = new Avatar(GILIUS, Math.toRadians(210)));
         angles = new int[] { 0, 120 };

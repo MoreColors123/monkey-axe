@@ -27,7 +27,7 @@ public class Player extends Actor {
 
     public static enum PlayerCharacter { 
         
-        AX("ax_battler", 6),
+        GUYBRUSH("guybrush_threepwood", 6),
         TYRIS("tyris_flare", 9), 
         GILIUS("gilius_thunderhead", 4);
         
