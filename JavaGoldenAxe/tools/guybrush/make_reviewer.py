@@ -6,9 +6,13 @@ the sheet to pick them, assign them to Golden Axe animations, watch the live
 filmstrip preview, then Export mapping.json and rerun build_atlas.py.
 """
 import base64
+import io
 import json
 import re
 from pathlib import Path
+
+import numpy as np
+from PIL import Image
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent / "assets" / "res"
@@ -59,7 +63,18 @@ def main():
     sprites = json.loads((HERE / "sprites.json").read_text())
     mapping = json.loads((HERE / "mapping.json").read_text())
     order, ga, speeds, loops = ga_frames()
-    sheet_b64 = base64.b64encode((HERE / "guybrush_source.png").read_bytes()).decode()
+
+    # Pre-key the green background out here in Python and embed a ready-made
+    # transparent PNG. Doing it in-browser needs canvas getImageData(), which
+    # Brave's fingerprinting protection can blank/randomise.
+    src = Image.open(HERE / "guybrush_source.png").convert("RGB")
+    arr = np.array(src).astype(np.int16)
+    alpha = np.where(np.abs(arr - np.array([0, 136, 68])).sum(axis=2) > 45,
+                     255, 0).astype(np.uint8)
+    rgba = Image.fromarray(np.dstack([np.array(src), alpha]), "RGBA")
+    buf = io.BytesIO()
+    rgba.save(buf, format="PNG")
+    sheet_b64 = base64.b64encode(buf.getvalue()).decode()
 
     data = {
         "sheet": "data:image/png;base64," + sheet_b64,
@@ -114,6 +129,7 @@ TEMPLATE = r"""<!doctype html>
   #overlay { position:fixed; inset:0; background:#0c0e12; z-index:50; overflow:auto; display:none; padding:14px; }
   #overlay h2 { margin-top:0; }
   .hint { color:#98a; font-size:12px; }
+  #err { display:none; background:#7a2020; color:#fff; padding:6px 12px; font-family:monospace; white-space:pre-wrap; }
 </style>
 </head>
 <body>
@@ -128,6 +144,7 @@ TEMPLATE = r"""<!doctype html>
   <label class="hint">Load mapping <input id="load" type="file" accept=".json" style="width:150px"></label>
   <button id="export" class="primary">Export mapping.json</button>
 </div>
+<div id="err"></div>
 <div id="main">
   <div id="left">
     <div id="sheetwrap"><canvas id="sheet"></canvas></div>
@@ -198,22 +215,19 @@ function resetAll(){ pushHistory(); mapping = JSON.parse(JSON.stringify(baseline
 const sheetCanvas = document.getElementById('sheet');
 const sctx = sheetCanvas.getContext('2d');
 let imgSource = null;
-const rawImg = new Image();
-rawImg.onload = () => { imgSource = keyGreen(rawImg); fitView(); drawSheet(); refresh(); };
-rawImg.src = DATA.sheet;
-
-function keyGreen(img){
-  const c = document.createElement('canvas');
-  c.width = img.width; c.height = img.height;
-  const x = c.getContext('2d');
-  x.drawImage(img,0,0);
-  const d = x.getImageData(0,0,c.width,c.height), a = d.data;
-  for (let i=0;i<a.length;i+=4){
-    if (Math.abs(a[i]-0)+Math.abs(a[i+1]-136)+Math.abs(a[i+2]-68) <= 45) a[i+3]=0;
-  }
-  x.putImageData(d,0,0);
-  return c;
+function showError(msg){
+  const e = document.getElementById('err');
+  e.style.display = 'block';
+  e.textContent = msg;
 }
+window.onerror = (m, s, l, c) => { showError('JS error: ' + m + ' (line ' + l + ')'); };
+
+// The embedded sheet is already transparent, so no canvas readback is needed
+// (which also keeps it working with Brave's fingerprinting protection).
+const rawImg = new Image();
+rawImg.onload = () => { imgSource = rawImg; fitView(); drawSheet(); refresh(); };
+rawImg.onerror = () => showError('The embedded sprite sheet failed to load.');
+rawImg.src = DATA.sheet;
 
 let zoom=0.55, panX=0, panY=0;
 function fitView(){ resizeCanvas(); }

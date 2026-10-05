@@ -51,15 +51,15 @@
   "jumping": {
    "mode": "bottom",
    "frames": [
-    "s0033",
-    "s0037"
+    "s0027",
+    "s0021"
    ]
   },
   "jumping_attack": {
    "mode": "bottom",
    "frames": [
-    "s0033",
-    "s0037"
+    "s0040",
+    "s0131"
    ]
   },
   "jumping_death_stab": {
@@ -160,11 +160,7 @@
   "thrown": {
    "mode": "center",
    "frames": [
-    "s0316",
-    "s0428",
-    "s0455",
-    "s0587",
-    "s0521"
+    "s0208"
    ]
   },
   "stunned_1": {
@@ -260,11 +256,7 @@
   "resting": {
    "mode": "center",
    "frames": [
-    "s0316",
-    "s0428",
-    "s0455",
-    "s0587",
-    "s0521"
+    "s0208"
    ]
   },
   "magic": {
@@ -277,11 +269,7 @@
   "dying": {
    "mode": "center",
    "frames": [
-    "s0316",
-    "s0428",
-    "s0455",
-    "s0587",
-    "s0521"
+    "s0208"
    ]
   },
   "dead": {
