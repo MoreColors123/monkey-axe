@@ -1,0 +1,306 @@
+{
+ "global_scale": 1.15,
+ "face": "s0121",
+ "animations": {
+  "idle": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "walking_down": {
+   "mode": "bottom",
+   "frames": [
+    "s0540",
+    "s0541",
+    "s0542",
+    "s0543",
+    "s0544",
+    "s0545",
+    "s0546",
+    "s0547"
+   ]
+  },
+  "walking_up": {
+   "mode": "bottom",
+   "frames": [
+    "s0053",
+    "s0054",
+    "s0055",
+    "s0056",
+    "s0057",
+    "s0058"
+   ]
+  },
+  "running": {
+   "mode": "bottom",
+   "frames": [
+    "s0000",
+    "s0001",
+    "s0013",
+    "s0002",
+    "s0003",
+    "s0014"
+   ]
+  },
+  "running_attack": {
+   "mode": "bottom",
+   "frames": [
+    "s0000",
+    "s0001",
+    "s0013",
+    "s0002",
+    "s0003",
+    "s0014"
+   ]
+  },
+  "jumping": {
+   "mode": "bottom",
+   "frames": [
+    "s0033",
+    "s0037"
+   ]
+  },
+  "jumping_attack": {
+   "mode": "bottom",
+   "frames": [
+    "s0033",
+    "s0037"
+   ]
+  },
+  "jumping_death_stab": {
+   "mode": "bottom",
+   "frames": [
+    "s0033",
+    "s0037"
+   ]
+  },
+  "attack_1": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_2": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_3": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_5": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_6": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_7": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_short": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "attack_special": {
+   "mode": "bottom",
+   "frames": [
+    "s0037",
+    "s0142"
+   ]
+  },
+  "attack_special_return": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "grab_and_throw": {
+   "mode": "bottom",
+   "frames": [
+    "s0036",
+    "s0021",
+    "s0022",
+    "s0050"
+   ]
+  },
+  "thrown": {
+   "mode": "center",
+   "frames": [
+    "s0316",
+    "s0428",
+    "s0455",
+    "s0587",
+    "s0521"
+   ]
+  },
+  "stunned_1": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "stunned_2": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "knock_down": {
+   "mode": "center",
+   "frames": [
+    "s0316",
+    "s0428",
+    "s0455",
+    "s0587",
+    "s0521"
+   ]
+  },
+  "stand_up": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounting": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_side": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_side_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_down": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_down_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_up": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_up_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "resting": {
+   "mode": "center",
+   "frames": [
+    "s0316",
+    "s0428",
+    "s0455",
+    "s0587",
+    "s0521"
+   ]
+  },
+  "magic": {
+   "mode": "bottom",
+   "frames": [
+    "s0033",
+    "s0037"
+   ]
+  },
+  "dying": {
+   "mode": "center",
+   "frames": [
+    "s0316",
+    "s0428",
+    "s0455",
+    "s0587",
+    "s0521"
+   ]
+  },
+  "dead": {
+   "mode": "center",
+   "frames": [
+    "s0316",
+    "s0428",
+    "s0455",
+    "s0587",
+    "s0521"
+   ]
+  }
+ }
+}

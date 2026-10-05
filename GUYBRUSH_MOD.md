@@ -23,18 +23,65 @@ Guybrush art into a new 600x1000 spritesheet. The new character is registered as
 (`idle`, `walking_down`, `walking_up`, `running`, `attack_1..7`,
 `attack_special`, `jumping`, `knock_down`, `dying`, ...).
 
-## Regenerating the art
+## Choosing the sprites (the mapper)
 
-The helper scripts live in `JavaGoldenAxe/tools/guybrush/`:
+Which Guybrush sprite is used for each Golden Axe animation lives in a plain
+text file: `JavaGoldenAxe/tools/guybrush/mapping.json`. You can edit it by hand,
+or use the visual editor.
 
-```bash
-cd JavaGoldenAxe/tools/guybrush
-python build_atlas.py            # rebuilds res/image/guybrush_threepwood.png + .char + HUD magic
-python patch_select.py           # swaps the select-screen portrait
+### Visual editor
+
+Double-click **`ReviewSprites.bat`** in the repo root. It builds and opens
+`reviewer.html` (a single self-contained page — no server needed). In the page:
+
+* the left side shows the whole source sheet with every detected sprite boxed;
+  click a box to select it, drag to pan, scroll to zoom;
+* the right side lists every Golden Axe animation. Pick one to see a live
+  filmstrip preview of how it will look in-game;
+* assign sprites with **+ append selected sprite** / **replace frames with
+  selected**, click a thumbnail to set that frame, and reorder with the arrows;
+* tune **mode** (`bottom` = feet on the ground, `center` = lying) and an optional
+  per-animation **scale**;
+* click **Preview all animations** for a full overview.
+
+When you are happy, click **Export mapping.json** and save the downloaded file
+over `JavaGoldenAxe/tools/guybrush/mapping.json`.
+
+### Bake it in
+
+Double-click **`BuildSprites.bat`** (runs `build_atlas.py`). This repaints
+`res/image/guybrush_threepwood.png` (and the `.char`/HUD files) from
+`mapping.json`. Then run `GoldenAxe.bat` to play.
+
+### Under the hood
+
+```
+detect_sprites.py  ->  sprites.json   every sprite on the sheet, with ids
+init_mapping.py    ->  mapping.json   the default mapping (run once / to reset)
+make_reviewer.py   ->  reviewer.html  the self-contained editor
+build_atlas.py     ->  game assets    mapping.json + sprites.json -> spritesheet
+patch_select.py    ->  select screen  swaps the portrait
 ```
 
-Both take an optional path to the source sheet and otherwise use
-`guybrush_source.png` in the same folder.
+`mapping.json` format:
+
+```json
+{
+  "global_scale": 1.15,
+  "face": "s0121",
+  "animations": {
+    "walking_down": { "mode": "bottom", "frames": ["s0540", "s0541"] },
+    "knock_down":   { "mode": "center", "scale": 1.0, "frames": ["s0316"] }
+  }
+}
+```
+
+`frames` is an ordered list of sprite ids; if an animation has more game frames
+than source frames, the list is looped. Animations missing from the file fall
+back to `idle`.
+
+Requires Python 3 with Pillow and numpy (on this machine the `python` on PATH,
+Inkscape's bundled build, already has both).
 
 ### Source art
 
@@ -72,7 +119,17 @@ src/actor/Player.java                             (enum AX -> GUYBRUSH)
 src/infra/Actor.java                              (magic switch AX -> GUYBRUSH)
 src/infra/GoldenAxeGame.java                      (demo character)
 src/scene/SelectPlayer.java                       (select avatar)
-tools/guybrush/*                                  (generator scripts + source sheet)
+GoldenAxe.bat / run.ps1                           (double-click launcher)
+ReviewSprites.bat / BuildSprites.bat              (edit / bake the mapping)
+tools/guybrush/guybrush_source.png                (source sheet)
+tools/guybrush/sprites.json                       (detected sprite catalog)
+tools/guybrush/mapping.json                       (editable animation -> sprite map)
+tools/guybrush/detect_sprites.py                  (rebuild sprites.json)
+tools/guybrush/init_mapping.py                    (reset mapping.json)
+tools/guybrush/make_reviewer.py                   (build reviewer.html)
+tools/guybrush/reviewer.html                      (visual mapper)
+tools/guybrush/build_atlas.py                     (bake mapping.json -> game assets)
+tools/guybrush/patch_select.py                    (swap the select portrait)
 ```
 
 ## Known limitations

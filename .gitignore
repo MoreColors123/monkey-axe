@@ -25,3 +25,9 @@ replay_pid*
 
 # ignore anything named dist/ and below
 dist/
+
+# local no-Ant build output (created by run.ps1)
+build-custom/
+
+# generated sprite detection preview
+JavaGoldenAxe/tools/guybrush/sprites_overview.png
