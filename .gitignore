@@ -31,3 +31,6 @@ build-custom/
 
 # generated sprite detection preview
 JavaGoldenAxe/tools/guybrush/sprites_overview.png
+
+# Windows Explorer "copy" duplicates (e.g. "mapping - Kopie.json")
+* - Kopie.*

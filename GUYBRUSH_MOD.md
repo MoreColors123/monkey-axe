@@ -37,11 +37,16 @@ Double-click **`ReviewSprites.bat`** in the repo root. It builds and opens
 * the left side shows the whole source sheet with every detected sprite boxed;
   click a box to select it, drag to pan, scroll to zoom;
 * the right side lists every Golden Axe animation. Pick one to see a live
-  filmstrip preview of how it will look in-game;
+  filmstrip preview and a **play/pause animated preview** that plays at the
+  animation's real speed (the `fps` box defaults to the speed from the `.char`
+  and can be overridden for previewing);
 * assign sprites with **+ append selected sprite** / **replace frames with
   selected**, click a thumbnail to set that frame, and reorder with the arrows;
 * tune **mode** (`bottom` = feet on the ground, `center` = lying) and an optional
   per-animation **scale**;
+* **Undo** steps back one action; **Reset section** restores just the current
+  animation and **Reset all** restores everything to the last exported/loaded
+  mapping (edited sections are marked with a `*`);
 * click **Preview all animations** for a full overview.
 
 When you are happy, click **Export mapping.json** and save the downloaded file

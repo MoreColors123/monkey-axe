@@ -55,12 +55,14 @@ def parse_frames(char_path):
 
 
 def fit_scale(spr_w, spr_h, w, h, cx, cy, mode, base):
-    s = base
-    if mode == "center":
+    # "bottom": keep one consistent size per character (clamp only by the space
+    # above the anchor, never by width - a wide pose just clips at the frame
+    # edge instead of shrinking the whole body).
+    # "center": fit inside the frame (used for lying poses).
+    if mode == "center" or cy <= 0:
         s = min(base, h / spr_h, w / spr_w)
-    elif cy > 0:
+    else:
         s = min(base, cy / spr_h)
-        s = min(s, w / spr_w)
     return max(s, 0.1)
 
 
@@ -87,12 +89,25 @@ def main():
 
     ax_char = ROOT / "chars" / "ax_battler.char"
     atlas = Image.new("RGBA", (ATLAS_W, ATLAS_H), (0, 0, 0, 0))
-    counters = {}
 
+    # Group sprite lines by animation, preserving order. Within one animation a
+    # rectangle may repeat (the original art holds a pose for several frames);
+    # those repeats must map to the SAME source sprite, otherwise the atlas
+    # (which is keyed by rectangle) collapses the animation into one pose.
+    grouped = {}
+    order = []
     for (anim, x, y, w, h, cx, cy) in parse_frames(ax_char):
+        if anim not in grouped:
+            grouped[anim] = []
+            order.append(anim)
+        grouped[anim].append((x, y, w, h, cx, cy))
+
+    for anim in order:
+        flist = grouped[anim]
         if anim == "none":
             continue
         if anim == "logo":
+            x, y, w, h, cx, cy = flist[0]
             spr = tile(sprites[face_id]).resize((w, h), Image.NEAREST)
             place(atlas, spr, x, y)
             continue
@@ -101,23 +116,29 @@ def main():
         ids = entry.get("frames") or animations["idle"]["frames"]
         mode = entry.get("mode", "bottom")
         base = entry.get("scale", global_scale)
-        idx = counters.get(anim, 0)
-        counters[anim] = idx + 1
 
-        sprite = sprites[ids[idx % len(ids)]]
-        spr = tile(sprite)
-        s = fit_scale(spr.width, spr.height, w, h, cx, cy, mode, base)
-        nw, nh = max(1, round(spr.width * s)), max(1, round(spr.height * s))
-        scaled = spr.resize((nw, nh), Image.NEAREST)
+        # assign one source per distinct rectangle, in order of first appearance
+        assign = {}
+        di = 0
+        for (x, y, w, h, cx, cy) in flist:
+            key = (x, y, w, h)
+            if key not in assign:
+                assign[key] = ids[di % len(ids)]
+                di += 1
+            sprite = sprites[assign[key]]
+            spr = tile(sprite)
+            s = fit_scale(spr.width, spr.height, w, h, cx, cy, mode, base)
+            nw, nh = max(1, round(spr.width * s)), max(1, round(spr.height * s))
+            scaled = spr.resize((nw, nh), Image.NEAREST)
 
-        if mode == "center":
-            px, py = x + cx - nw // 2, y + (h - nh) // 2
-        else:
-            px, py = x + cx - nw // 2, y + cy - nh
+            if mode == "center":
+                px, py = x + cx - nw // 2, y + (h - nh) // 2
+            else:
+                px, py = x + cx - nw // 2, y + cy - nh
 
-        layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-        layer.paste(scaled, (px - x, py - y), scaled)
-        place(atlas, layer, x, y)
+            layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            layer.paste(scaled, (px - x, py - y), scaled)
+            place(atlas, layer, x, y)
 
     out_png = ROOT / "image" / f"{CHAR_ID}.png"
     atlas.save(out_png)

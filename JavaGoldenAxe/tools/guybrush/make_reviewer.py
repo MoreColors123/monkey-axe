@@ -18,13 +18,27 @@ sprite_re = re.compile(
     r"^sprite\s+(\S+)\s+(\S+)\s+(-?\d+)\s+(-?\d+)\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s*$")
 
 
+param_re = re.compile(r"^parameter\s+(\S+)\s+(\S+)\s+(\S+)\s*$")
+
+
 def ga_frames():
-    """Parse the character .char into {anim: [{x,y,w,h,cx,cy}]}."""
+    """Parse the character .char into frames + per-animation speed/loop."""
     anims = {}
     order = []
+    speeds = {}
+    loops = {}
     with open(ROOT / "chars" / "guybrush_threepwood.char", encoding="latin-1") as f:
         for line in f:
-            m = sprite_re.match(line.strip())
+            text = line.strip()
+            pm = param_re.match(text)
+            if pm:
+                a, k, v = pm.group(1), pm.group(2), pm.group(3)
+                if k == "animation_speed":
+                    speeds[a] = float(v)
+                elif k == "animation_loop":
+                    loops[a] = (v.lower() == "true")
+                continue
+            m = sprite_re.match(text)
             if not m:
                 continue
             anim = m.group(1)
@@ -38,13 +52,13 @@ def ga_frames():
                 "w": int(m.group(5)), "h": int(m.group(6)),
                 "cx": int(m.group(7)), "cy": int(m.group(8)),
             })
-    return order, anims
+    return order, anims, speeds, loops
 
 
 def main():
     sprites = json.loads((HERE / "sprites.json").read_text())
     mapping = json.loads((HERE / "mapping.json").read_text())
-    order, ga = ga_frames()
+    order, ga, speeds, loops = ga_frames()
     sheet_b64 = base64.b64encode((HERE / "guybrush_source.png").read_bytes()).decode()
 
     data = {
@@ -53,6 +67,8 @@ def main():
         "mapping": mapping,
         "animOrder": order,
         "ga": ga,
+        "speed": speeds,
+        "loop": loops,
     }
 
     html = TEMPLATE.replace("/*__DATA__*/", "const DATA = " + json.dumps(data) + ";")
@@ -83,8 +99,10 @@ TEMPLATE = r"""<!doctype html>
   .anim { display:inline-block; margin:2px; padding:3px 7px; border:1px solid #444; border-radius:5px; cursor:pointer; font-size:12px; }
   .anim.active { background:#3a4b8a; border-color:#6f87e0; }
   .anim .n { color:#9fd; }
+  .anim .mod { color:#ffd84a; }
   #editor { flex:1 1 auto; overflow:auto; padding:10px; }
   #film { background:#0c0e12; border:1px solid #333; border-radius:5px; width:100%; }
+  #animprev { background:#0c0e12; border:1px solid #333; border-radius:5px; image-rendering:pixelated; }
   .framebar { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
   .fbox { border:1px solid #444; border-radius:5px; padding:2px; text-align:center; background:#22262e; }
   .fbox.sel { border-color:#ffea00; }
@@ -105,6 +123,8 @@ TEMPLATE = r"""<!doctype html>
   <span style="flex:1"></span>
   <label>global scale <input id="gscale" type="number" step="0.05" style="width:70px"></label>
   <button id="all">Preview all animations</button>
+  <button id="undo" title="Undo the last change">Undo</button>
+  <button id="resetall" title="Restore every section to the last exported state">Reset all</button>
   <label class="hint">Load mapping <input id="load" type="file" accept=".json" style="width:150px"></label>
   <button id="export" class="primary">Export mapping.json</button>
 </div>
@@ -118,8 +138,17 @@ TEMPLATE = r"""<!doctype html>
     <div id="editor">
       <div class="row">
         <b id="animname"></b>
+        <button id="resetsection" title="Restore this section to the last exported state">Reset section</button>
         <label>mode <select id="mode"><option value="bottom">bottom (feet on ground)</option><option value="center">center (lying)</option></select></label>
         <label>scale <input id="ascale" type="number" step="0.05" placeholder="default" style="width:80px"></label>
+      </div>
+      <div class="row">
+        <canvas id="animprev" width="260" height="150"></canvas>
+        <div>
+          <div><button id="play">Pause</button> <label>fps <input id="fps" type="number" step="0.5" style="width:70px"></label></div>
+          <div class="hint" id="animmeta"></div>
+          <div class="hint">animated at the animation's real speed</div>
+        </div>
       </div>
       <canvas id="film" height="110"></canvas>
       <div class="row">
@@ -146,6 +175,25 @@ let mapping = JSON.parse(JSON.stringify(DATA.mapping));
 if (!mapping.animations) mapping.animations = {};
 let selected = null;
 let selAnim = DATA.animOrder[0];
+
+// baseline = the last exported/loaded state; each section can be reset to it.
+// history = undo stack, one entry per edit action.
+let baseline = JSON.parse(JSON.stringify(mapping));
+let history = [];
+function pushHistory(){ history.push(JSON.stringify(mapping)); if (history.length > 500) history.shift(); }
+function undo(){ if (!history.length) return; mapping = JSON.parse(history.pop()); refresh(); }
+function sectionEqual(a){
+  return JSON.stringify(mapping.animations[a] || null)
+       === JSON.stringify((baseline.animations || {})[a] || null);
+}
+function resetSection(){
+  pushHistory();
+  const b = (baseline.animations || {})[selAnim];
+  if (b) mapping.animations[selAnim] = JSON.parse(JSON.stringify(b));
+  else delete mapping.animations[selAnim];
+  refresh();
+}
+function resetAll(){ pushHistory(); mapping = JSON.parse(JSON.stringify(baseline)); refresh(); }
 
 const sheetCanvas = document.getElementById('sheet');
 const sctx = sheetCanvas.getContext('2d');
@@ -241,9 +289,11 @@ function animFrames(anim){
   return {e, ids: ids.slice()};
 }
 function drawFrameSprite(ctx, sp, gf, mode, base, ax, ay){
-  let s = base;
-  if (mode==='center') s = Math.min(base, gf.h/sp.h, gf.w/sp.w);
-  else { if (gf.cy>0) s = Math.min(s, gf.cy/sp.h); s = Math.min(s, gf.w/sp.w); }
+  // mirrors build_atlas.fit_scale: "center" fits the frame, "bottom" keeps a
+  // constant size and clips wide poses instead of shrinking the character.
+  let s;
+  if (mode==='center' || gf.cy<=0) s = Math.min(base, gf.h/sp.h, gf.w/sp.w);
+  else s = Math.min(base, gf.cy/sp.h);
   s = Math.max(s, 0.1);
   const nw = Math.max(1, Math.round(sp.w*s)), nh = Math.max(1, Math.round(sp.h*s));
   const dx = ax - Math.floor(nw/2);
@@ -296,13 +346,62 @@ function drawFrames(){
     box.appendChild(cv);
     const c = document.createElement('div'); c.className='c';
     const mk = (t, fn) => { const b=document.createElement('button'); b.textContent=t; b.onclick=fn; c.appendChild(b); };
-    mk('\u25c0', ()=>{ if(i>0){ const a=entry(selAnim).frames; [a[i-1],a[i]]=[a[i],a[i-1]]; refresh(); }});
-    mk('\u25b6', ()=>{ const a=entry(selAnim).frames; if(i<a.length-1){ [a[i],a[i+1]]=[a[i+1],a[i]]; refresh(); }});
-    mk('\u2715', ()=>{ entry(selAnim).frames.splice(i,1); refresh(); });
-    box.onclick = (ev)=>{ if (ev.target.tagName==='CANVAS' && selected){ entry(selAnim).frames[i]=selected.id; refresh(); } };
+    mk('\u25c0', ()=>{ if(i>0){ pushHistory(); const a=entry(selAnim).frames; [a[i-1],a[i]]=[a[i],a[i-1]]; refresh(); }});
+    mk('\u25b6', ()=>{ const a=entry(selAnim).frames; if(i<a.length-1){ pushHistory(); [a[i],a[i+1]]=[a[i+1],a[i]]; refresh(); }});
+    mk('\u2715', ()=>{ pushHistory(); entry(selAnim).frames.splice(i,1); refresh(); });
+    box.onclick = (ev)=>{ if (ev.target.tagName==='CANVAS' && selected){ pushHistory(); entry(selAnim).frames[i]=selected.id; refresh(); } };
     box.appendChild(c);
     bar.appendChild(box);
   });
+}
+
+// ---- animated preview (plays at the animation's real speed) ----
+const animPrev = document.getElementById('animprev');
+const apctx = animPrev.getContext('2d');
+let playing = true, animT = 0, lastT = performance.now();
+
+function realFps(a){ const sp = (DATA.speed[a] != null) ? DATA.speed[a] : 0.1; return sp * 60; }
+function currentFps(){
+  const ov = parseFloat(document.getElementById('fps').value);
+  if (!isNaN(ov) && ov > 0) return ov;
+  return Math.max(0.5, realFps(selAnim));
+}
+function drawAnimPreview(){
+  const {e, ids} = animFrames(selAnim);
+  const gfs = DATA.ga[selAnim] || [];
+  const ctx = apctx, W = animPrev.width, H = animPrev.height;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#0c0e12'; ctx.fillRect(0,0,W,H);
+  ctx.imageSmoothingEnabled = false;
+  if (!gfs.length || !imgSource) return;
+  const n = gfs.length;
+  const i = Math.min(n-1, Math.floor(animT));
+  const gf = gfs[i];
+  const sp = S[ids[i % ids.length]];
+  const base = e.scale || mapping.global_scale || 1.15;
+  const z = 2, ax = W/2, ay = H-18;
+  if (sp){
+    ctx.save(); ctx.scale(z,z);
+    drawFrameSprite(ctx, sp, gf, e.mode||'bottom', base, ax/z, ay/z);
+    ctx.restore();
+  }
+  ctx.strokeStyle='rgba(120,120,120,0.4)';
+  ctx.beginPath(); ctx.moveTo(0,ay+0.5); ctx.lineTo(W,ay+0.5); ctx.stroke();
+  ctx.fillStyle='#adf'; ctx.font='12px monospace';
+  ctx.fillText('frame ' + (i+1) + '/' + n, 6, 14);
+}
+function tick(now){
+  const dt = Math.min(0.1, (now - lastT)/1000); lastT = now;
+  if (playing && imgSource){
+    const n = (DATA.ga[selAnim]||[]).length;
+    if (n > 0){
+      animT += dt * currentFps();
+      const loop = DATA.loop[selAnim] === true;
+      if (animT >= n){ animT = loop ? (animT % n) : n - 0.0001; }
+    }
+  }
+  drawAnimPreview();
+  requestAnimationFrame(tick);
 }
 
 function refresh(){
@@ -310,7 +409,10 @@ function refresh(){
   document.getElementById('mode').value = entry(selAnim).mode || 'bottom';
   const e = entry(selAnim);
   document.getElementById('ascale').value = e.scale || '';
-  renderAnimList(); drawFilm(); drawFrames(); showInfo();
+  const loop = DATA.loop[selAnim] === true;
+  document.getElementById('animmeta').textContent =
+    `speed ${(DATA.speed[selAnim]!=null?DATA.speed[selAnim]:0.1)} = ${Math.round(realFps(selAnim)*10)/10} fps - ${loop?'loops':'plays once'}`;
+  renderAnimList(); drawFilm(); drawFrames(); drawAnimPreview(); showInfo();
 }
 
 function renderAnimList(){
@@ -320,26 +422,38 @@ function renderAnimList(){
     const e = mapping.animations[a];
     const d = document.createElement('div');
     d.className = 'anim' + (a===selAnim?' active':'');
-    d.innerHTML = `${a} <span class="n">${e && e.frames ? e.frames.length : 0}</span>`;
-    d.onclick = () => { selAnim = a; refresh(); };
+    d.innerHTML = `${a} <span class="n">${e && e.frames ? e.frames.length : 0}</span>`
+                + (sectionEqual(a) ? '' : ' <span class="mod">*</span>');
+    d.onclick = () => { selAnim = a; animT = 0; document.getElementById('fps').value = Math.round(realFps(a)*10)/10; refresh(); };
     el.appendChild(d);
   }
 }
 
 // ---- controls ----
-document.getElementById('mode').onchange = e => { entry(selAnim).mode = e.target.value; refresh(); };
+document.getElementById('mode').onchange = e => { pushHistory(); entry(selAnim).mode = e.target.value; refresh(); };
 document.getElementById('ascale').onchange = e => {
   const v = parseFloat(e.target.value);
+  pushHistory();
   if (isNaN(v)) delete entry(selAnim).scale; else entry(selAnim).scale = v;
   refresh();
 };
-document.getElementById('append').onclick = () => { if (selected){ entry(selAnim).frames.push(selected.id); refresh(); } };
-document.getElementById('onlysel').onclick = () => { if (selected){ entry(selAnim).frames = [selected.id]; refresh(); } };
-document.getElementById('clear').onclick = () => { entry(selAnim).frames = []; refresh(); };
-document.getElementById('gscale').onchange = e => { const v=parseFloat(e.target.value); if(!isNaN(v)){mapping.global_scale=v; refresh();} };
+document.getElementById('append').onclick = () => { if (selected){ pushHistory(); entry(selAnim).frames.push(selected.id); refresh(); } };
+document.getElementById('onlysel').onclick = () => { if (selected){ pushHistory(); entry(selAnim).frames = [selected.id]; refresh(); } };
+document.getElementById('clear').onclick = () => { pushHistory(); entry(selAnim).frames = []; refresh(); };
+document.getElementById('undo').onclick = undo;
+document.getElementById('resetall').onclick = resetAll;
+document.getElementById('resetsection').onclick = resetSection;
+document.getElementById('play').onclick = () => {
+  playing = !playing;
+  document.getElementById('play').textContent = playing ? 'Pause' : 'Play';
+};
+document.getElementById('gscale').onchange = e => { const v=parseFloat(e.target.value); if(!isNaN(v)){pushHistory(); mapping.global_scale=v; refresh();} };
 document.getElementById('export').onclick = () => {
   const text = JSON.stringify(mapping, null, 1);
   document.getElementById('out').value = text;
+  baseline = JSON.parse(JSON.stringify(mapping));
+  history = [];
+  renderAnimList();
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([text], {type:'application/json'}));
   a.download = 'mapping.json'; a.click();
@@ -352,7 +466,14 @@ document.getElementById('copy').onclick = () => {
 document.getElementById('load').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   const r = new FileReader();
-  r.onload = () => { try { mapping = JSON.parse(r.result); refresh(); } catch(err){ alert('bad JSON: '+err); } };
+  r.onload = () => {
+    try {
+      mapping = JSON.parse(r.result);
+      baseline = JSON.parse(JSON.stringify(mapping));
+      history = [];
+      refresh();
+    } catch(err){ alert('bad JSON: '+err); }
+  };
   r.readAsText(f);
 };
 document.getElementById('all').onclick = () => {
@@ -379,7 +500,9 @@ document.getElementById('closeoverlay').onclick = () => document.getElementById(
 // init
 resizeCanvas();
 document.getElementById('gscale').value = mapping.global_scale;
+document.getElementById('fps').value = Math.round(realFps(selAnim)*10)/10;
 refresh();
+requestAnimationFrame(tick);
 window.addEventListener('load', ()=>{ resizeCanvas(); drawSheet(); });
 </script>
 </body>
