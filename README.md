@@ -8,6 +8,10 @@ Golden Axe game implemented in java using only standard libraries (java 2D, AWT,
 
 ## Building locally
 
+> **This fork (Guybrush Threepwood mod):** no Ant needed — double-click
+> **`GoldenAxe.bat`** in the repo root (or run `.\run.ps1`); it compiles with
+> `javac` and launches the game. The Ant steps below are the upstream original.
+
 1. Install JDK (Adoptium download link)
 1. Set JAVA_HOME = path/to/jdk
 1. Set PATH = PATH + JAVA_HOME/bin

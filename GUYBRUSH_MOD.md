@@ -23,9 +23,10 @@ a PNG spritesheet (`res/image/<character-id>.png`).
 
 Rather than hand-author a brand-new rig, the mod reuses Ax Battler's exact frame
 layout (so all hitboxes, grab points and state names keep working) and *bakes*
-Guybrush art into a fresh spritesheet (600x1000, grown if the layout was
-de-shared). The new character is registered as `guybrush_threepwood`, which maps
-1:1 onto the existing animation names (`idle`, `walking_down`, `walking_up`,
+Guybrush art into a fresh spritesheet (600×1000, grown after the layout was
+de-shared — currently 654×1053). The new character is registered as
+`guybrush_threepwood`, which maps 1:1 onto the existing animation names
+(`idle`, `walking_down`, `walking_up`,
 `running`, `attack_1..7`, `attack_special`, `jumping`, `knock_down`, `dying`, ...).
 
 ## Choosing the sprites (the mapper)
@@ -83,7 +84,7 @@ patch_select.py    ->  select screen  swaps the portrait
   "global_scale": 1.15,
   "face": "s0121",
   "animations": {
-    "walking_down": { "mode": "bottom", "frames": ["s0540", "s0541"] },
+    "walking_down": { "mode": "bottom", "frames": ["s0004", "s0005"] },
     "knock_down":   { "mode": "center", "scale": 1.0, "frames": ["s0316"] }
   }
 }
@@ -108,14 +109,20 @@ Inkscape's bundled build, already has both).
 
 | Golden Axe animation | Guybrush source |
 | --- | --- |
-| `idle`, `stunned_*`, `stand_up`, mounted | front standing |
+| `idle` | standing stance (`s0137`) |
 | `walking_down` | front-facing walk (sheet row 1) |
 | `walking_up` | back-facing walk (sheet row 2) |
-| `running`, `running_attack` | side-view walk |
-| `attack_1..7`, `attack_short`, `grab_and_throw` | forward point/punch |
-| `attack_special` | raised cutlass |
+| `walking_side`, `running` | side walk (sheet row 1) |
+| `attack_1..7` | cutlass swing cycle (`s0321`/`s0322`/`s0320`) |
+| `attack_short` | short swing sequence (`s0549`..`s0571`) |
+| `running_attack` | cutlass lunge |
+| `attack_special` | special sequence (`s0484`, `s0486`, `s0496`..`s0503`) |
+| `attack_special_return` | pointing poses |
 | `jumping*` | arms-up |
-| `magic` | arms-up |
+| `magic` | horn-blow poses (`s1142`/`s1145`) |
+| `grab_and_throw` | grab / throw poses |
+| `stunned_1/2`, `stand_up` | stunned / getting-up poses |
+| `mounting`, `mounted_*` | walking frames as stand-ins |
 | `knock_down`, `thrown`, `resting`, `dying`, `dead` | lying on ground |
 
 ## Files changed

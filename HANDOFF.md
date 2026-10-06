@@ -96,8 +96,9 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
   `walking_side` = NEW (mod): profile side-walk for horizontal movement, added
    by an approved engine patch in `Actor.Walking` (plays it when the character
-   provides it, else the original walking_down/up behaviour). 8 frames:
-   s0540..s0547 in fresh atlas space at the end of `guybrush_layout.char`.
+   provides it, else the original walking_down/up behaviour). 8 frames drawn
+   from the sheet's row-1 side walk (see §7); it has its own rectangles at the
+   end of `guybrush_layout.char`.
   `walking_down` = toward camera (front-facing), `walking_up` = away
    (back-facing). Note: with `walking_side` in place, horizontal movement no
    longer plays `walking_down`, so the front walk shows only when walking
@@ -249,10 +250,11 @@ back to Ax's shared layout.
 
 Current walk mapping (tuned from the top two sheet rows):
 `walking_down` = front-facing walk `s0004..s0007` (row 1),
-`walking_up` = back-facing walk `s0017..s0020` (row 2), `idle` = `s0023`,
-`walking_side` = profile walk `s0540..s0547` (plays for horizontal movement via
-the approved `Actor.Walking` patch — the original mapping had no such slot),
-and `running` = the side walk from row 1 (`s0000,s0001,s0013,s0002,...`).
+`walking_up` = back-facing walk `s0017..s0020` (row 2), `idle` = `s0137`,
+`walking_side` = the row-1 side walk (`s0000,s0001,s0013,s0001,s0002,s0003,
+s0014,s0003`; plays for horizontal movement via the approved `Actor.Walking`
+patch — the original mapping had no such slot), and `running` = the same row-1
+side walk at a shorter cycle (`s0000,s0001,s0013,s0002,s0003,s0014`).
 
 > **State note:** `mapping.json` is the working copy and changes often. After any
 > edit run `BuildSprites.bat` (or `python build_atlas.py`) to bake it into
@@ -352,15 +354,18 @@ A red error banner appears at the top if the page throws.
   `s0322` (strike) → `s0320` (guard), looping to fill each layout frame count.
   User decision (via the reviewer's Suggestions bar): the sheet's swordfight
   rows mix props (stick/bone/cutlass), so one consistent weapon wins over
-  per-attack variety. `attack_special` keeps the monkey poses (s0487/s0483);
-  `attack_special_return` keeps the pointing poses.
+  per-attack variety. `attack_special` keeps its own special sequence
+  (s0484, s0486, s0496..s0503); `attack_special_return` keeps the pointing
+  poses.
 * Cross-animation shared rectangles are collapsed to one sprite (the first
   animation in layout order owns the rectangle), so no doubling. The trade-off is
   that a sharing animation may show the owner's pose. Use `rect_overrides` in
   `mapping.json` to force a rectangle's sprite/size/mode. The reviewer lists any
   frames that come from shared rectangles owned by another animation.
-* All `mounted_*` states use the plain standing pose (no mounted art exists).
-* `magic` uses an arms-up pose; magic effects themselves are unchanged (Ax's volcano).
+* All `mounted_*` states reuse walking frames as stand-ins (no mounted art
+  exists).
+* `magic` uses the horn-blow poses (s1142/s1145); the magic *effect* is still
+  unchanged (Ax's volcano).
 
 ### Single-frame animations (inherited from the remake)
 
@@ -403,6 +408,38 @@ fidelity improvement. The reviewer previews extra mapped frames already
   (`Sprite.draw` flips), so that's usually fine.
 * Select-screen name is `GUYBRUSH` (rendered by the bitmap font).
 
+### Reviewing all game parts (proposed — not built)
+
+Pose work is covered by the reviewer (`REVIEWER.md`); this proposal covers the
+*game* itself. The stage chain is sequential and gated (a wave unlocks the
+camera only when its enemies die), so a full pass is 30+ minutes. Proposal: a
+3-part harness behind a single `TEST_MODE` flag next to the existing toggles
+(default off, revertible by flipping booleans). Nothing here is implemented yet.
+
+Coverage target:
+
+| Part | Where | What the mod can break |
+| --- | --- | --- |
+| Stages 1–9 | `stage_N.inf` | walk-in, waves, camera locks, grabs, mounted combat, magic, chicken legs, pits/death height |
+| Bosses | end of stages (Death Adder at 9) | hit reactions on big sprites, death-stab |
+| Map interludes | `OldMap` | Guybrush on the map, SPACE-advance |
+| Continue / game over | on death | death poses, continue screen |
+| Ranking | after ending | portrait / entry |
+| 2-player co-op | any stage | partner revive/throws, 2× HUD (needs P2) |
+
+* **A. Boot stage select** — `TEST_STAGE = N`: boot directly into stage N with
+  both players spawned (P1 Guybrush, P2 optionally Tyris to exercise co-op).
+  ~10 lines; `Stage.onEnter` already loads by counter.
+* **B. Wave-skip hotkeys** (guarded by `TEST_MODE`): `K` = kill active enemies
+  (clear the wave → camera unlock), `L` = force the next scroll / camera-lock
+  release, `H` = refill both players' energy. ~20 lines in `Stage.fixedUpdate`.
+* **C. God/potion keys** (same gate): `U` = toggle invincibility (`Actor`
+  already has an `invincible` field), `J` = refill magic potions. ~5 lines.
+
+Estimate: A+B in one session (~30 min), C +10. **Not recommended:** a
+replay/save-state system (the engine has no serialization) or an auto-tour demo
+(the demo player is scripted walking, no combat AI).
+
 ---
 
 ## 11. Verification workflow
@@ -440,6 +477,11 @@ fidelity improvement. The reviewer previews extra mapped frames already
   duplicates are too (`* - Kopie.*`).
 * `.gitattributes`/CRLF warnings on commit are harmless.
 * `detect_sprites.py` uses a BFS over ~0.8M foreground pixels — takes a few seconds.
+* `run.ps1` only recompiles when `build-custom\main\Main.class` is **missing**.
+  After switching/reverting commits the source is newer but the stale build is
+  still used, so the game can boot the old behaviour. Delete
+  `JavaGoldenAxe\build-custom` (or run `.\run.ps1 -Rebuild`) whenever you change
+  Java sources outside a normal edit-and-run.
 
 ---
 
@@ -528,8 +570,8 @@ item at a time, and tick it off here as it is done.
   baked, headless-verified.
 - [x] Map coherent swing sequences for `attack_1..7`, `attack_short` — resolved
   as the unified cycle above (no per-attack weapon art exists on the sheet).
-  `attack_special` keeps the monkey (user choice), `attack_special_return` the
-  pointing poses.
+  `attack_special` keeps its own special sequence (user choice),
+  `attack_special_return` the pointing poses.
 - [ ] `running_attack`, `jumping_attack`, `jumping_death_stab` are single held
   poses; to animate them, add frames to the layout (see §10). The reviewer now
   previews the full mapped frame list for these, but the extra frames only bake
@@ -539,23 +581,34 @@ item at a time, and tick it off here as it is done.
 - [x] `walking_down` / `thrown` proposals: walking_down dismissed (keep front
   walk; superseded by the approved `walking_side` engine patch + frames);
   thrown applied as s0312 + s0208 per comment. Committed.
-- [ ] Proper collapse/lying poses for `stunned_1/2`, `knock_down`, `stand_up`,
-  `thrown`, `dying`, `dead`, `resting`.
+- [x] Collapse/lying poses mapped and baked (commit `0050721`): `thrown`
+  s0312+s0208, `knock_down` s0207+s0208, `dying` s0207 (fall) → s0208 (flat),
+  `dead` s0208, `resting` s0450, `stand_up` s0263, `stunned_1` s1090..s1097,
+  `stunned_2` s0938+s0937, `idle` → s0137. Note: `stunned_1` still holds a few
+  small animal-figure sprites — worth a re-check in the reviewer.
 
 ### Phase 4 — Mounted & magic
-- [ ] `mounting` / `mounted_*`: no mounted art; decide (reuse a sit/crouch pose or leave standing).
-- [ ] `magic`: pose + decide whether to replace Ax's volcano effect (`magic_fire_*.ani`).
+- [x] `mounting` / `mounted_*`: no mounted art exists; walking frames are used
+  as stand-ins.
+- [ ] `magic` *effect*: pose is done (horn-blow s1142/s1145); decide whether to
+  replace Ax's volcano effect (`magic_fire_*.ani`).
 
 ### Phase 5 — Presentation
-- [ ] Select screen: verify name/portrait; consider a nicer full-body pose.
-- [ ] Ending cutscene (`ending.ani`): verify Guybrush appears and dialogue reads right.
-- [ ] HUD: verify `logo` portrait + `hud_magic_guybrush_threepwood`.
+- [x] Select screen: name/portrait verified (`patch_select.py`).
+- [x] Ending cutscene (`ending.ani`): Guybrush appears; idle/running verified.
+- [x] HUD: `logo` portrait + `hud_magic_guybrush_threepwood` verified.
 - [ ] Sounds: `.char` still plays Ax's `hit`/`hit_rap`; optionally remap.
+- [ ] Select screen: consider a nicer full-body pose (cosmetic).
 
 ### Phase 6 — Robustness & docs
 - [ ] Headless "render every animation" contact sheet + one-command
   "rebuild assets + game" script.
 - [ ] Keep this file current; commit atomically.
+
+### Proposed (not approved)
+- [ ] Game-part testing harness (boot-stage select + wave-skip / god hotkeys
+  behind `TEST_MODE`) — see §10 "Reviewing all game parts". Awaiting a go/no-go;
+  nothing built yet.
 
 ### Where an agent can help most
 - Reviewer Rectangles panel + shared-rect highlighting + one-click override (1a).
