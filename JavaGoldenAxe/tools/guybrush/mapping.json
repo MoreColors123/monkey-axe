@@ -40,16 +40,17 @@
   "running_attack": {
    "mode": "bottom",
    "frames": [
-    "s0204",
-    "s0203",
-    "s0202"
+    "s0321",
+    "s0320",
+    "s0321"
    ]
   },
   "jumping": {
    "mode": "bottom",
    "frames": [
-    "s0263",
-    "s0258"
+    "s0333",
+    "s0327",
+    "s0333"
    ]
   },
   "jumping_attack": {
@@ -61,8 +62,7 @@
   "jumping_death_stab": {
    "mode": "bottom",
    "frames": [
-    "s0301",
-    "s0305"
+    "s0327"
    ]
   },
   "attack_1": {
