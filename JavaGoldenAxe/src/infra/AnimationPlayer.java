@@ -46,6 +46,11 @@ public class AnimationPlayer {
     }
 
     public void setAnimation(String animationId, boolean resetFrame) {
+        if (GoldenAxeGame.DEBUG_STATE_SWITCH
+                && (currentAnimation == null
+                    || !currentAnimation.getName().equals(animationId))) {
+            System.out.println("[anim] " + animationId);
+        }
         currentAnimation = animations.get(animationId);
         currentAnimation.clearReactedActors();
         if (resetFrame && currentAnimation != null) {
