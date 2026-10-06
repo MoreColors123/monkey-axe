@@ -43,7 +43,10 @@ ANIMS = ["attack_1", "attack_2", "attack_3", "attack_5", "attack_6",
          "attack_7", "attack_short", "magic", "walking_side",
          "stunned_1", "stunned_2", "knock_down", "stand_up",
          "thrown", "dying", "dead", "resting",
-         "running_attack", "jumping_attack", "jumping_death_stab"]
+         "running_attack", "jumping_attack", "jumping_death_stab",
+         "jumping", "idle", "walking_down", "walking_up", "running",
+         "grab_and_throw", "mounting", "mounted_side", "mounted_side_flip",
+         "mounted_up", "mounted_up_flip", "mounted_down", "mounted_down_flip"]
 
 
 def parse(lines):
@@ -107,6 +110,43 @@ def anchor_rel_sets(lines_by_rect, sprites, colliders, points):
     return res
 
 
+def attached_items(rect, colliders, points):
+    """Absolute coords of every collider/point attaching to a rect."""
+    (x, y, w, h) = rect[:4]
+    cols, pts = [], []
+    for (_i, head, px, py, pw, ph) in colliders:
+        if not (px + pw <= x or x + w <= px or py + ph <= y or y + h <= py):
+            cols.append((px, py, pw, ph))
+    for (_i, head, px, py) in points:
+        if x <= px < x + w and y <= py < y + h:
+            pts.append((px, py))
+    return cols, pts
+
+
+def extents(rect, colliders, points):
+    """Room the attached items need around the ANCHOR, per side.
+
+    Returns (left, right, up, down) - how far the items reach from the
+    anchor (cx, cy). A rect must leave at least this much room on each
+    side or a clone will land outside it (unattachable) or inside a
+    neighbour (foreign attachment).
+    """
+    (x, y, w, h, cx, cy) = rect
+    cols, pts = attached_items(rect, colliders, points)
+    left = right = up = down = 0
+    for (px, py, pw, ph) in cols:
+        left = max(left, (x + cx) - px)
+        right = max(right, (px + pw) - (x + cx))
+        up = max(up, (y + cy) - py)
+        down = max(down, (py + ph) - (y + cy))
+    for (px, py) in pts:
+        left = max(left, (x + cx) - px)
+        right = max(right, px - (x + cx))
+        up = max(up, (y + cy) - py)
+        down = max(down, py - (y + cy))
+    return (left, right, up, down)
+
+
 def main():
     check_only = "--check" in sys.argv[1:]
     lines = LAYOUT.read_text(encoding="latin-1").splitlines()
@@ -130,9 +170,45 @@ def main():
 
     base_x = maxx + 4
     next_y = 0
+    col_x = base_x
+    # generous packing: cloned colliders may overhang their rectangle by a
+    # tall margin (a BODY box anchored low reaches ~40px above the frame),
+    # so new rects must sit far enough apart that foreign clones cannot
+    # reach in (12px was enough before colliders were cloned)
+    PACK_GAP = 110
+    COL_HEIGHT = 2200   # wrap into a fresh column to keep the atlas compact
+
+    def alloc_slot(n_w, n_h):
+        nonlocal next_y, col_x
+        nx, ny = col_x, next_y
+        next_y += n_h + PACK_GAP
+        if next_y > COL_HEIGHT:
+            col_x += 240
+            next_y = 0
+        return nx, ny
+
     out = list(lines)
     fixes = []
     new_rects = []
+
+    # drop exact duplicate collider/point lines - the engine treats each
+    # collider as its own hitbox, so duplicates double-count hits
+    seen_cl = set()
+    deduped = []
+    for ln in out:
+        t = ln.strip()
+        if t.startswith(("collider ", "point ")):
+            if t in seen_cl:
+                continue
+            seen_cl.add(t)
+        deduped.append(ln)
+    if len(deduped) != len(out):
+        print(f"  ~ removed {len(out) - len(deduped)} duplicate "
+              f"collider/point line(s)")
+        out = deduped
+        sprites, colliders, points = parse(out)
+        assign = assignments(sprites, ANIMS, mapping)
+        before = anchor_rel_sets(None, sprites, colliders, points)
 
     for anim in sorted(assign):
         entry = mapping["animations"].get(anim) or mapping["animations"]["idle"]
@@ -145,31 +221,46 @@ def main():
             (x, y, w, h, cx, cy) = rect
             mode = (mapping["animations"].get(anim)
                     or mapping["animations"]["idle"]).get("mode", "bottom")
+            (ex_l, ex_r, ex_u, ex_d) = extents(rect, colliders, points)
+            # sprite room at the target scale (art pasted at px = x+cx-nw//2:
+            # left span nw//2, right span nw - nw//2)
+            nw = round(base * sp["w"])
+            nh = round(base * sp["h"])
             if mode == "center":
-                # centre-mode: the sprite is fitted to the box and vertically
-                # centred, so the BOX must grow around it. Preserve the art's
-                # vertical offset to the actor (h/2 - cy) so hitboxes and the
-                # figure stay aligned; the art is horizontally centred on the
-                # actor regardless of cx, so cx just needs to allow the width.
-                n_w = max(w, math.ceil(base * sp["w"]) + 2)
-                n_h = max(h, math.ceil(base * sp["h"]) + 2)
-                n_cx = n_w // 2
-                n_cy = (n_h - (h - 2 * cy)) // 2
-                if (n_w, n_h, n_cx, n_cy) == (w, h, cx, cy):
-                    continue
-            else:
-                half = math.ceil(base * sp["w"] / 2)
-                need_cy = math.ceil(base * sp["h"])
-                d_cx = max(0, half - cx)
-                d_cy = max(0, need_cy - cy)
-                n_cx = cx + d_cx
-                n_w = max(w + d_cx, n_cx + half)
-                n_cy = cy + d_cy
-                n_h = h + d_cy
-                if d_cx == 0 and d_cy == 0 and n_w == w:
+                # centre-mode: art centred in the box; preserve the art's
+                # exact offset to the anchor (h/2 - cy) so art and hitboxes
+                # stay aligned relative to the actor
+                art_off = h / 2 - cy            # art centre below anchor
+                need_l = max(nw // 2, ex_l)
+                need_r = max(nw - nw // 2, ex_r)
+                need_u = max(math.ceil(nh / 2 - art_off), ex_u)
+                need_d = max(math.ceil(nh / 2 + art_off), ex_d)
+                if (cx >= need_l and w - cx >= need_r
+                        and cy >= need_u and h - cy >= need_d):
                     continue  # already fits
-            nx, ny = base_x, next_y
-            next_y += n_h + GAP
+                n_w = need_l + need_r + 2
+                n_cx = need_l + 1
+                n_h = need_u + need_d + 2
+                n_cy = (n_h - round(2 * art_off)) // 2
+                # rounding the art offset may cost a room; grow by 2 (keeps
+                # the offset exact) until both rooms are safe
+                while n_cy < need_u + 1 or n_h - n_cy < need_d + 1:
+                    n_h += 2
+                    n_cy = (n_h - round(2 * art_off)) // 2
+            else:
+                # bottom-mode: art bottom sits on the anchor
+                need_l = max(nw // 2, ex_l)
+                need_r = max(nw - nw // 2, ex_r)
+                need_u = max(nh, ex_u)
+                need_d = max(2, ex_d)
+                if (cx >= need_l and w - cx >= need_r
+                        and cy >= need_u and h - cy >= need_d):
+                    continue  # already fits
+                n_cx = need_l + 1
+                n_w = n_cx + need_r + 1
+                n_cy = need_u + 1
+                n_h = n_cy + need_d + 1
+            nx, ny = alloc_slot(n_w, n_h)
             new_rects.append((anim, (nx, ny, n_w, n_h, n_cx, n_cy), rect))
             fixes.append((anim, rect, sp_id, (nx, ny, n_w, n_h, n_cx, n_cy)))
             # rewrite every sprite line using this rectangle
@@ -184,7 +275,12 @@ def main():
     # one, appended to the animation's block, with the first existing rect's
     # colliders/points cloned anchor-relative (the lunge/stab keeps its
     # hitbox on the new frames).
-    for anim in sorted(assign):
+    # Animations are processed by DESCENDING last-line position: every insert
+    # shifts lines below it, so inserting from the bottom of the file upward
+    # keeps each animation's computed insert index valid.
+    alloc_order = sorted(assign, key=lambda a: -max(
+        (i for (i, a2, *_r) in sprites if a2 == a), default=-1))
+    for anim in alloc_order:
         entry = mapping["animations"].get(anim) or mapping["animations"]["idle"]
         ids = entry.get("frames") or mapping["animations"]["idle"]["frames"]
         rects = [r for (r, _sid) in assign[anim]]
@@ -198,36 +294,45 @@ def main():
         mode = entry.get("mode", "bottom")
         insert_at = max(i for (i, a2, *_rest) in sprites if a2 == anim) + 1
         (ox, oy, ow, oh, ocx, ocy) = rects[0]
+        (ex_l, ex_r, ex_u, ex_d) = extents(rects[0], colliders, points)
         added = []
         for k in range(len(rects), target):
             sp = sheet.get(ids[k % len(ids)])
             if not sp:
                 print(f"  !! {anim}: sprite {ids[k % len(ids)]} not in sprites.json")
                 continue
-            n_w = math.ceil(base * sp["w"]) + 2
-            n_h = math.ceil(base * sp["h"]) + 2
-            n_cx = n_w // 2
-            n_cy = (n_h - 2) if mode != "center" else (n_h // 2)
-            nx, ny = base_x, next_y
-            next_y += n_h + GAP
+            if mode == "center":
+                half_w = math.ceil(base * sp["w"] / 2)
+                half_h = math.ceil(base * sp["h"] / 2)
+                # keep the same art-to-anchor offset as the clone source so
+                # multi-frame lying animations do not wobble
+                src_art_off = (oh / 2 - ocy)
+                need_l = max(half_w, ex_l)
+                need_r = max(half_w, ex_r)
+                need_u = max(math.ceil(half_h - src_art_off), ex_u)
+                need_d = max(math.ceil(half_h + src_art_off), ex_d)
+                n_w = need_l + need_r + 2
+                n_cx = need_l + 1
+                n_h = need_u + need_d + 2
+                n_cy = (n_h - round(2 * src_art_off)) // 2
+                while n_cy < need_u + 1 or n_h - n_cy < need_d + 1:
+                    n_h += 2
+                    n_cy = (n_h - round(2 * src_art_off)) // 2
+            else:
+                half = math.ceil(base * sp["w"] / 2)
+                n_cx = max(half, ex_l) + 1
+                n_w = n_cx + max(half, ex_r) + 1
+                n_cy = max(math.ceil(base * sp["h"]), ex_u) + 1
+                n_h = n_cy + max(2, ex_d) + 1
+            nx, ny = alloc_slot(n_w, n_h)
             out.insert(insert_at,
                        f"sprite {anim} RIGHT {nx} {ny} {n_w} {n_h} {n_cx} {n_cy}")
             insert_at += 1
             added.append((anim, (nx, ny, n_w, n_h, n_cx, n_cy), rects[0]))
         new_rects.extend(added)
-        for (_i, head, px, py, pw, ph) in colliders:
-            if not (px + pw <= ox or ox + ow <= px or py + ph <= oy or oy + oh <= py):
-                for (_a, (nx, ny, nw_, nh_, ncx, ncy), _old) in added:
-                    tx = nx + ncx + (px - (ox + ocx))
-                    ty = ny + ncy + (py - (oy + ocy))
-                    out.append(" ".join(["collider"] + head[1:]
-                                        + [str(tx), str(ty), str(pw), str(ph)]))
-        for (_i, head, px, py) in points:
-            if ox <= px < ox + ow and oy <= py < oy + oh:
-                for (_a, (nx, ny, nw_, nh_, ncx, ncy), _old) in added:
-                    tx = nx + ncx + (px - (ox + ocx))
-                    ty = ny + ncy + (py - (oy + ocy))
-                    out.append(" ".join(["point"] + head[1:] + [str(tx), str(ty)]))
+        # NOTE: no clone loop here - the shared clone block below iterates
+        # new_rects (allocated included); cloning here AND there would write
+        # duplicate collider lines (double-counted hitboxes)
         if added:
             print(f"  + {anim}: allocated {len(added)} new frame rect(s) "
                   f"(was {len(rects)}, target {target})")
@@ -278,11 +383,15 @@ def main():
             print(f"  !! {anim}: lost frames ({len(b)} -> {len(a)})"); ok = False; continue
         for k, (fb, sb) in enumerate(b):
             if a[k][1] != sb:
-                print(f"  !! {anim} frame {k}: attached set changed"); ok = False
+                print(f"  !! {anim} frame {k}: attached set changed")
+                print("    before:", sorted(sb))
+                print("    after :", sorted(a[k][1])); ok = False
         for k in range(len(b), len(a)):
             if b and a[k][1] != b[0][1]:
                 print(f"  !! {anim} new frame {k}: attachment differs from "
-                      f"clone source"); ok = False
+                      f"clone source")
+                print("    source:", sorted(b[0][1]))
+                print("    new   :", sorted(a[k][1])); ok = False
     # 2. no overlapping distinct sprite rectangles (duplicate lines sharing one
 #    rectangle are intentional - several frames may use the same rect)
     rects = sorted({(a, x, y, w, h) for (_i, a, x, y, w, h, _cx, _cy) in ns})

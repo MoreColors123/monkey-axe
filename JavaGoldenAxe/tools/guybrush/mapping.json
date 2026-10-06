@@ -56,13 +56,13 @@
   "jumping_attack": {
    "mode": "bottom",
    "frames": [
-    "s0327"
+    "s0354"
    ]
   },
   "jumping_death_stab": {
    "mode": "bottom",
    "frames": [
-    "s0327"
+    "s0333"
    ]
   },
   "attack_1": {
@@ -116,16 +116,26 @@
   "attack_short": {
    "mode": "bottom",
    "frames": [
-    "s0321",
-    "s0322",
-    "s0320"
+    "s0549",
+    "s0554",
+    "s0556",
+    "s0558",
+    "s0571"
    ]
   },
   "attack_special": {
    "mode": "bottom",
    "frames": [
-    "s0487",
-    "s0483"
+    "s0484",
+    "s0486",
+    "s0496",
+    "s0497",
+    "s0498",
+    "s0499",
+    "s0500",
+    "s0501",
+    "s0502",
+    "s0503"
    ]
   },
   "attack_special_return": {
@@ -156,24 +166,33 @@
   "stunned_1": {
    "mode": "bottom",
    "frames": [
-    "s0302",
-    "s0303"
+    "s1090",
+    "s1092",
+    "s1094",
+    "s1095",
+    "s1096",
+    "s1097"
    ]
   },
   "stunned_2": {
    "mode": "bottom",
    "frames": [
-    "s0303",
-    "s0305"
+    "s0938",
+    "s0937"
    ]
   },
   "knock_down": {
    "mode": "center",
-   "frames": []
+   "frames": [
+    "s0207",
+    "s0208"
+   ]
   },
   "stand_up": {
    "mode": "bottom",
-   "frames": []
+   "frames": [
+    "s0263"
+   ]
   },
   "mounting": {
    "mode": "bottom",
