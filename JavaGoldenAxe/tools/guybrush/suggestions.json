@@ -4,105 +4,84 @@
    "animation": "attack_1",
    "mode": "bottom",
    "frames": [
-    "s0329",
+    "s0321",
     "s0322",
-    "s0333",
-    "s0335",
-    "s0329"
+    "s0320"
    ],
-   "note": "combo opener: stance (s0329) -> windup (s0322) -> low swing (s0333) -> thrust (s0335) -> back to stance",
-   "status": "proposed",
-   "comment": ""
+   "note": "unified cutlass swing, loops to fill 5 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
+   "comment": "this mixes a bone and a stick. try s0321, s0322, s0320"
   },
   {
    "animation": "attack_2",
    "mode": "bottom",
    "frames": [
-    "s0330",
-    "s0331",
-    "s0332",
-    "s0334"
+    "s0321",
+    "s0322",
+    "s0320"
    ],
-   "note": "second hit: blade-ready (s0330) into the crouched swing arc s0331->s0332->s0334",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 4 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   },
   {
    "animation": "attack_3",
    "mode": "bottom",
    "frames": [
-    "s0330",
-    "s0332",
-    "s0333",
-    "s0347",
-    "s0330"
+    "s0321",
+    "s0322",
+    "s0320"
    ],
-   "note": "third hit: swing arc ending on the spark-hit frame (s0347), then recover to stance",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 5 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   },
   {
    "animation": "attack_5",
    "mode": "bottom",
    "frames": [
-    "s0329",
+    "s0321",
     "s0322",
-    "s0331",
-    "s0332",
-    "s0333",
-    "s0334",
-    "s0336",
-    "s0347"
+    "s0320"
    ],
-   "note": "big 8-frame combo: stance, windup, full swing arc s0331-3334, thrust (s0336), spark hit (s0347)",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 8 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   },
   {
    "animation": "attack_6",
    "mode": "bottom",
    "frames": [
-    "s0349",
-    "s0350",
-    "s0350",
-    "s0351",
-    "s0351",
-    "s0335",
-    "s0336",
-    "s0347"
+    "s0321",
+    "s0322",
+    "s0320"
    ],
-   "note": "advancing stab series (s0349-0351 blade-forward walk frames), crouch thrusts, spark hit",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 8 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   },
   {
    "animation": "attack_7",
    "mode": "bottom",
    "frames": [
+    "s0321",
     "s0322",
-    "s0326",
-    "s0327",
-    "s0328",
-    "s0347",
-    "s0330"
+    "s0320"
    ],
-   "note": "finisher: windup (s0322), standing swing (s0326) into low lunges (s0327/s0328), spark hit, recover",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 6 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   },
   {
    "animation": "attack_short",
    "mode": "bottom",
    "frames": [
-    "s0332",
-    "s0333",
-    "s0335",
-    "s0332",
-    "s0333",
-    "s0335"
+    "s0321",
+    "s0322",
+    "s0320"
    ],
-   "note": "quick jab: two fast low-swing + thrust cycles from the crouched arc",
-   "status": "proposed",
+   "note": "unified cutlass swing, loops to fill 6 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
+   "status": "approved",
    "comment": ""
   }
  ]
