@@ -323,8 +323,12 @@ A red error banner appears at the top if the page throws.
 
 ## 10. Open issues / ideas (not done)
 
-* Regular attacks reuse front "point/punch" poses; `attack_special` uses the
-  raised-cutlass sprites. A better swing sequence could be sourced from the sheet.
+* Regular attacks all play the same 3-frame cutlass cycle — `s0321` (top) →
+  `s0322` (strike) → `s0320` (guard), looping to fill each layout frame count.
+  User decision (via the reviewer's Suggestions bar): the sheet's swordfight
+  rows mix props (stick/bone/cutlass), so one consistent weapon wins over
+  per-attack variety. `attack_special` keeps the monkey poses (s0487/s0483);
+  `attack_special_return` keeps the pointing poses.
 * Cross-animation shared rectangles are collapsed to one sprite (the first
   animation in layout order owns the rectangle), so no doubling. The trade-off is
   that a sharing animation may show the owner's pose. Use `rect_overrides` in
@@ -493,13 +497,14 @@ item at a time, and tick it off here as it is done.
   "original (Ax)" preview uses `origGa` from `ax_battler.char` so it still works.
 
 ### Phase 2 — Attack fidelity
-- [ ] Review the attack-swing proposals in the reviewer's **Suggestions** bar
-  (`attack_1..7`, `attack_short` — swordfight poses from rows ~y1140-1360;
-  `attack_special` keeps the monkey) — approve/comment there, then Export and
-  bake. The agent verifies headlessly and commits afterwards.
-- [ ] Map coherent swing sequences for `attack_1..7`, `attack_short`,
-  `attack_special`, `attack_special_return` (currently a few front "point/punch"
-  poses; `attack_special` uses the raised-cutlass sprites).
+- [x] Attack-swing proposals reviewed in the reviewer's **Suggestions** bar: all
+  dismissed; per the attack_1 comment ("this mixes a bone and a stick. try
+  s0321, s0322, s0320") every attack now plays the same cutlass cycle. Applied,
+  baked, headless-verified.
+- [x] Map coherent swing sequences for `attack_1..7`, `attack_short` — resolved
+  as the unified cycle above (no per-attack weapon art exists on the sheet).
+  `attack_special` keeps the monkey (user choice), `attack_special_return` the
+  pointing poses.
 - [ ] `running_attack`, `jumping_attack`, `jumping_death_stab` are single held
   poses; to animate them, add frames to the layout (see §10). The reviewer now
   previews the full mapped frame list for these, but the extra frames only bake
