@@ -5,7 +5,7 @@
   "idle": {
    "mode": "bottom",
    "frames": [
-    "s0023"
+    "s0137"
    ]
   },
   "walking_down": {
@@ -253,7 +253,7 @@
   "resting": {
    "mode": "center",
    "frames": [
-    "s0208"
+    "s0450"
    ]
   },
   "magic": {
@@ -266,13 +266,14 @@
   "dying": {
    "mode": "center",
    "frames": [
+    "s0207",
     "s0208"
    ]
   },
   "dead": {
    "mode": "center",
    "frames": [
-    "s0433"
+    "s0208"
    ]
   },
   "walking_side": {

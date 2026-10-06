@@ -197,12 +197,12 @@ sprite magic RIGHT 658 1597 44 85 22 81
 parameter dying sound male_dead
 parameter dying animation_speed 0.5
 parameter dying animation_loop true
-sprite dying RIGHT 1022 44 90 24 45 17
+sprite dying RIGHT 2416 396 63 54 31 32
 sprite dying RIGHT 1022 80 90 24 45 17
 
-sprite dead RIGHT 2328 0 84 38 42 24
-sprite dead RIGHT 2328 148 84 38 42 19
-sprite dead RIGHT 2328 296 84 38 42 19
+sprite dead RIGHT 2416 0 89 22 44 16
+sprite dead RIGHT 2416 132 89 22 44 11
+sprite dead RIGHT 2416 264 89 22 44 11
 sprite dead RIGHT 1116 303 115 44 57 22
 sprite dead RIGHT 1116 359 199 65 99 32
 
