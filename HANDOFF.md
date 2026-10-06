@@ -85,15 +85,19 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   rectangles** — doing so breaks hitboxes and grab points.
 * Animations are only registered if present; the available names drive which
   states exist (`Actor.createAllAvailableStates`). Player animation names:
-  `idle`, `walking_down`, `walking_up`, `running`, `running_attack`, `jumping`,
-  `jumping_attack`, `jumping_death_stab`, `attack_1..7`, `attack_special`,
-  `attack_special_return`, `attack_short`, `grab_and_throw`, `thrown`, `stunned_1/2`,
-  `knock_down`, `stand_up`, `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
-  `walking_down` = the engine's main walk animation - it plays for ALL
-   horizontal movement too (`Actor.Walking` picks it whenever `vz >= 0`), so
-   this slot must hold the **profile side-walk art** (s0540..s0547); the
-   front-facing walk (s0004..0007) here is why left/right walking looked like
-   "walking down". `walking_up` = away (back-facing).
+  `idle`, `walking_down`, `walking_up`, `walking_side`, `running`,
+  `running_attack`, `jumping`, `jumping_attack`, `jumping_death_stab`,
+  `attack_1..7`, `attack_special`, `attack_special_return`, `attack_short`,
+  `grab_and_throw`, `thrown`, `stunned_1/2`, `knock_down`, `stand_up`,
+  `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
+  `walking_side` = NEW (mod): profile side-walk for horizontal movement, added
+   by an approved engine patch in `Actor.Walking` (plays it when the character
+   provides it, else the original walking_down/up behaviour). 8 frames:
+   s0540..s0547 in fresh atlas space at the end of `guybrush_layout.char`.
+  `walking_down` = toward camera (front-facing), `walking_up` = away
+   (back-facing). Note: with `walking_side` in place, horizontal movement no
+   longer plays `walking_down`, so the front walk shows only when walking
+   toward the camera.
 
 Player-character wiring:
 
@@ -240,12 +244,11 @@ back to Ax's shared layout.
   ids can shift, so re-check `mapping.json` after re-running it.
 
 Current walk mapping (tuned from the top two sheet rows):
-`walking_down` = front-facing walk `s0004..s0007` (row 1) — **known regression**:
-the engine plays `walking_down` for horizontal movement too, so this slot needs
-the profile walk `s0540..s0547` (as in the original mapping); a proposal is
-pending in the reviewer's Suggestions bar.
-`walking_up` = back-facing walk `s0017..s0020` (row 2), `idle` = `s0023`, and
-`running` = the side walk from row 1 (`s0000,s0001,s0013,s0002,...`).
+`walking_down` = front-facing walk `s0004..s0007` (row 1),
+`walking_up` = back-facing walk `s0017..s0020` (row 2), `idle` = `s0023`,
+`walking_side` = profile walk `s0540..s0547` (plays for horizontal movement via
+the approved `Actor.Walking` patch — the original mapping had no such slot),
+and `running` = the side walk from row 1 (`s0000,s0001,s0013,s0002,...`).
 
 > **State note:** `mapping.json` is the working copy and changes often. After any
 > edit run `BuildSprites.bat` (or `python build_atlas.py`) to bake it into
@@ -529,9 +532,9 @@ item at a time, and tick it off here as it is done.
   once the layout actually has that many rectangles.
 
 ### Phase 3 — Held / reaction states
-- [ ] Approve the `walking_down` profile-walk proposal (s0540..s0547) and the
-  `thrown` box-fill proposal (s0312/s0208/s0450) in the reviewer's Suggestions
-  bar, then Export + bake; the agent verifies and commits.
+- [x] `walking_down` / `thrown` proposals: walking_down dismissed (keep front
+  walk; superseded by the approved `walking_side` engine patch + frames);
+  thrown applied as s0312 + s0208 per comment. Committed.
 - [ ] Proper collapse/lying poses for `stunned_1/2`, `knock_down`, `stand_up`,
   `thrown`, `dying`, `dead`, `resting`.
 
