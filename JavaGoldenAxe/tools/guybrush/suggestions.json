@@ -1,6 +1,29 @@
 {
  "suggestions": [
   {
+   "animation": "running_attack",
+   "mode": "bottom",
+   "frames": [
+    "s0322",
+    "s0326",
+    "s0328"
+   ],
+   "note": "LUNGE arc, 3 frames: standing swing (s0322) -> coat-flowing thrust (s0326) -> deep low lunge, cutlass fully extended (s0328). Currently your s0204/s0203/s0202 are three near-identical standing poses - animating them reads subtly; this arc is dramatic. Poses animate only after Phase 2b adds layout frames + the engine advance.",
+   "status": "proposed",
+   "comment": ""
+  },
+  {
+   "animation": "jumping_death_stab",
+   "mode": "bottom",
+   "frames": [
+    "s0354",
+    "s0328"
+   ],
+   "note": "STAB, 2 frames: crouched blade-forward (s0354) -> deep extended lunge (s0328, held to landing). Follows jumping_attack (s0327 swing) 90ms in: swing -> stab -> hold. Alternative: keep your s0301/s0305 (startled lean-back poses - they read as reaction, not stab).",
+   "status": "proposed",
+   "comment": ""
+  },
+  {
    "animation": "attack_1",
    "mode": "bottom",
    "frames": [
