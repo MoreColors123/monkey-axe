@@ -83,6 +83,35 @@
    "note": "unified cutlass swing, loops to fill 6 layout frame(s): top (s0321) -> strike (s0322) -> guard (s0320). Same cycle for every attack - the sheet mixes props (stick/bone/cutlass), per your attack_1 comment.",
    "status": "approved",
    "comment": ""
+  },
+  {
+   "animation": "walking_down",
+   "mode": "bottom",
+   "frames": [
+    "s0540",
+    "s0541",
+    "s0542",
+    "s0543",
+    "s0544",
+    "s0545",
+    "s0546",
+    "s0547"
+   ],
+   "note": "PROFILE side-walk, 8 frames. The engine plays walking_down for ALL horizontal movement (Actor.Walking: vz >= 0 -> walking_down), so this slot needs the side-walk art; the current front walk (s0004-0007) is why left/right looks like walking down. Restores the original mapping (was correct before). Note: walking DOWN (toward camera) will show the profile walk too - same as before the retune.",
+   "status": "proposed",
+   "comment": ""
+  },
+  {
+   "animation": "thrown",
+   "mode": "center",
+   "frames": [
+    "s0312",
+    "s0208",
+    "s0450"
+   ],
+   "note": "Fixes the tiny first frame: s0312 (50x38, falling backward) fills the 42x36 box at 84% instead of s0301 shrinking to 77% of a small box. Keeps s0208 (flat flight, fills the wide box) and s0450 (landed sprawl).",
+   "status": "proposed",
+   "comment": ""
   }
  ]
 }

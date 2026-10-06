@@ -80,7 +80,11 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   `jumping_attack`, `jumping_death_stab`, `attack_1..7`, `attack_special`,
   `attack_special_return`, `attack_short`, `grab_and_throw`, `thrown`, `stunned_1/2`,
   `knock_down`, `stand_up`, `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
-  `walking_down` = toward camera (front-facing), `walking_up` = away (back-facing).
+  `walking_down` = the engine's main walk animation - it plays for ALL
+   horizontal movement too (`Actor.Walking` picks it whenever `vz >= 0`), so
+   this slot must hold the **profile side-walk art** (s0540..s0547); the
+   front-facing walk (s0004..0007) here is why left/right walking looked like
+   "walking down". `walking_up` = away (back-facing).
 
 Player-character wiring:
 
@@ -227,7 +231,10 @@ back to Ax's shared layout.
   ids can shift, so re-check `mapping.json` after re-running it.
 
 Current walk mapping (tuned from the top two sheet rows):
-`walking_down` = front-facing walk `s0004..s0007` (row 1),
+`walking_down` = front-facing walk `s0004..s0007` (row 1) — **known regression**:
+the engine plays `walking_down` for horizontal movement too, so this slot needs
+the profile walk `s0540..s0547` (as in the original mapping); a proposal is
+pending in the reviewer's Suggestions bar.
 `walking_up` = back-facing walk `s0017..s0020` (row 2), `idle` = `s0023`, and
 `running` = the side walk from row 1 (`s0000,s0001,s0013,s0002,...`).
 
@@ -511,6 +518,9 @@ item at a time, and tick it off here as it is done.
   once the layout actually has that many rectangles.
 
 ### Phase 3 — Held / reaction states
+- [ ] Approve the `walking_down` profile-walk proposal (s0540..s0547) and the
+  `thrown` box-fill proposal (s0312/s0208/s0450) in the reviewer's Suggestions
+  bar, then Export + bake; the agent verifies and commits.
 - [ ] Proper collapse/lying poses for `stunned_1/2`, `knock_down`, `stand_up`,
   `thrown`, `dying`, `dead`, `resting`.
 
