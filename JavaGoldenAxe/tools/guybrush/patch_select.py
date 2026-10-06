@@ -17,12 +17,16 @@ def key_green(im):
     alpha = np.where(dist > 45, 255, 0).astype(np.uint8)
     return Image.fromarray(np.dstack([np.array(im), alpha]), "RGBA")
 
-# clear Ax region (571,13,32,64) with margin
-clear = Image.new("RGBA", (52, 84), (0, 0, 0, 0))
-sel.paste(clear, (563, 3), clear)
+# Clear Ax's old portrait. Frame is (571,13,32,64), anchor (16,60). Stop at
+# x=604 so Gilius (whose sprite starts at x=611) is untouched. NOTE: the clear
+# must be pasted with NO mask - pasting an alpha-0 image using itself as mask
+# replaces nothing, which is why the old Ax art used to show through.
+sel.paste((0, 0, 0, 0), (569, 9, 604, 81))
 
 idle = key_green(src.crop((378, 5, 378 + 24, 5 + 47)))
-s = 64 / idle.height
+# Fit inside the frame: at most cy (60) tall above the feet and w (32) wide,
+# otherwise the portrait is clipped at the top of the sprite rectangle.
+s = min(60 / idle.height, 32 / idle.width)
 nw, nh = round(idle.width * s), round(idle.height * s)
 idle = idle.resize((nw, nh), Image.NEAREST)
 # anchor (cx=16, cy=60) -> feet at (571+16, 13+60)
