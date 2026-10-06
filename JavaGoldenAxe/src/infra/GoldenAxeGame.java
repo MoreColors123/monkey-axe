@@ -44,8 +44,12 @@ public class GoldenAxeGame {
     // Set to false to restore the normal attract flow (intro cutscene + demo).
     public static boolean SKIP_INTRO = true;
     // When true, every player state switch is printed to the console
-    // (diagnosing "only runs left/right"). Remove once diagnosed.
+    // (diagnosis aid; remove once done).
     public static boolean DEBUG_STATE_SWITCH = true;
+    // When true, the game boots straight into Stage 1 as Guybrush, in action
+    // (no OL Presents / disclaimer / winners screens, no title, no select
+    // screen, no intro). Set to false to restore the normal flow.
+    public static boolean TEST_BOOT_TO_GAME = true;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;
@@ -94,7 +98,15 @@ public class GoldenAxeGame {
         sceneManager.addState(new Ranking(sceneManager, this));
         sceneManager.startAll();
         
-        sceneManager.switchTo("initializing");
+        // TESTING: boot straight into the action (see TEST_BOOT_TO_GAME).
+        if (TEST_BOOT_TO_GAME) {
+            numberOfPlayers = 1;
+            characterPlayer1 = GUYBRUSH;
+            sceneManager.switchTo("stage");
+        }
+        else {
+            sceneManager.switchTo("initializing");
+        }
         //sceneManager.switchTo("ol_presents");
         //sceneManager.switchTo("title");
         //sceneManager.switchTo("intro");

@@ -42,10 +42,14 @@ Launchers (double-click, all in the repo root):
 * `run.ps1` — the engine behind the bats; `.\run.ps1 -Rebuild` forces recompile.
 
 Testing toggles (in `src/infra/GoldenAxeGame.java`):
+* `TEST_BOOT_TO_GAME = true` — boots straight into Stage 1 as Guybrush in the
+  arena (skips OL Presents / disclaimer / winners / title / select / intro);
+  set `false` to restore the normal flow.
 * `SKIP_INTRO = true` — the title never fires the attract intro (`title.ani`'s
   show_intro event), so no intro cutscene/demo; set `false` to restore.
-* `DEBUG_STATE_SWITCH` — prints every state switch to the console (temporary
-  diagnosis aid; remove once done).
+* `DEBUG_STATE_SWITCH` — prints state/animation switches to the console
+  (`[state]` deduplicated to real changes; `[anim]` on animation change).
+  Temporary diagnosis aid; remove once done.
 * Stage 1's walk-in + opening dialogue are skipped in
   `assets/res/stage/stage_1.inf` (players spawn in `walking` at the arena; the
   original lines are commented right there — swap to restore).

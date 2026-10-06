@@ -1403,11 +1403,6 @@ public class Actor extends Entity implements Comparable<Actor> {
         @Override
         public void fixedUpdate() {
             updateControl();
-            if (GoldenAxeGame.DEBUG_STATE_SWITCH && control == PLAYER_1) {
-                System.out.println("[walk] vx=" + vx + " vz=" + vz
-                    + " dir=" + direction
-                    + " anim=" + animationPlayer.getCurrentAnimation().getName());
-            }
             if (fireControlEnabled && jumpControlEnabled) {
                 stateManager.switchTo("attack_special");
                 return;

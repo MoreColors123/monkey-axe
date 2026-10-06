@@ -46,7 +46,12 @@ public class StateManager<T, S> {
     }
 
     public State<T, S> switchTo(String stateName) { 
-        if (GoldenAxeGame.DEBUG_STATE_SWITCH) {
+        // log only real changes; repeated switchTo() calls for a state this
+        // manager is already in (e.g. animator-driven playback) must not spam
+        if (GoldenAxeGame.DEBUG_STATE_SWITCH
+                && (currentState == null
+                    || !stateName.equals(currentState.getName()))) {
+            
             System.out.println("[state] -> " + stateName);
         }
         if (currentState == null) {
