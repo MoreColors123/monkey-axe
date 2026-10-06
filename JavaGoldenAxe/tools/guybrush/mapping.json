@@ -40,33 +40,29 @@
   "running_attack": {
    "mode": "bottom",
    "frames": [
-    "s0000",
-    "s0001",
-    "s0013",
-    "s0002",
-    "s0003",
-    "s0014"
+    "s0204",
+    "s0203",
+    "s0202"
    ]
   },
   "jumping": {
    "mode": "bottom",
    "frames": [
-    "s0027",
-    "s0021"
+    "s0263",
+    "s0258"
    ]
   },
   "jumping_attack": {
    "mode": "bottom",
    "frames": [
-    "s0040",
-    "s0131"
+    "s0327"
    ]
   },
   "jumping_death_stab": {
    "mode": "bottom",
    "frames": [
-    "s0033",
-    "s0037"
+    "s0301",
+    "s0305"
    ]
   },
   "attack_1": {
@@ -135,8 +131,8 @@
   "attack_special": {
    "mode": "bottom",
    "frames": [
-    "s0037",
-    "s0142"
+    "s0487",
+    "s0483"
    ]
   },
   "attack_special_return": {
@@ -151,8 +147,8 @@
   "grab_and_throw": {
    "mode": "bottom",
    "frames": [
-    "s0036",
-    "s0021",
+    "s0323",
+    "s0324",
     "s0022",
     "s0050"
    ]
@@ -160,42 +156,32 @@
   "thrown": {
    "mode": "center",
    "frames": [
-    "s0208"
+    "s0301",
+    "s0208",
+    "s0450"
    ]
   },
   "stunned_1": {
    "mode": "bottom",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s0302",
+    "s0303"
    ]
   },
   "stunned_2": {
    "mode": "bottom",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s0303",
+    "s0305"
    ]
   },
   "knock_down": {
    "mode": "center",
-   "frames": [
-    "s0316",
-    "s0428",
-    "s0455",
-    "s0587",
-    "s0521"
-   ]
+   "frames": []
   },
   "stand_up": {
    "mode": "bottom",
-   "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
-   ]
+   "frames": []
   },
   "mounting": {
    "mode": "bottom",
@@ -262,8 +248,8 @@
   "magic": {
    "mode": "bottom",
    "frames": [
-    "s0033",
-    "s0037"
+    "s0321",
+    "s0320"
    ]
   },
   "dying": {

@@ -57,7 +57,7 @@ parameter attack_2 animation_speed 0.175
 parameter attack_2 attack_distance 24
 parameter attack_2 next_long_attack attack_3
 parameter attack_2 next_short_attack attack_5
-sprite attack_2 RIGHT 176 296 39 55 23 53
+sprite attack_2 RIGHT 577 0 39 55 23 53
 sprite attack_2 RIGHT 222 289 69 62 22 60
 sprite attack_2 RIGHT 298 276 56 75 19 73
 sprite attack_2 RIGHT 298 276 56 75 19 73
@@ -86,14 +86,14 @@ sprite attack_5 RIGHT 3 467 48 70 33 68
 parameter attack_6 animation_speed 0.175
 parameter attack_6 next_attack attack_7
 parameter attack_6 next_attack_in_advance 2.0
-sprite attack_6 RIGHT 3 467 48 70 33 68
-sprite attack_6 RIGHT 3 467 48 70 33 68
-sprite attack_6 RIGHT 55 457 42 80 24 78
-sprite attack_6 RIGHT 102 466 48 71 24 69
-sprite attack_6 RIGHT 102 466 48 71 24 69
-sprite attack_6 RIGHT 55 457 42 80 24 78
-sprite attack_6 RIGHT 3 467 48 70 33 68
-sprite attack_6 RIGHT 3 467 48 70 33 68
+sprite attack_6 RIGHT 577 67 48 70 33 68
+sprite attack_6 RIGHT 577 67 48 70 33 68
+sprite attack_6 RIGHT 577 149 42 80 24 78
+sprite attack_6 RIGHT 577 241 48 71 24 69
+sprite attack_6 RIGHT 577 241 48 71 24 69
+sprite attack_6 RIGHT 577 149 42 80 24 78
+sprite attack_6 RIGHT 577 67 48 70 33 68
+sprite attack_6 RIGHT 577 67 48 70 33 68
 
 parameter attack_7 animation_speed 0.175
 sprite attack_7 RIGHT 213 477 42 59 10 58
@@ -121,12 +121,12 @@ sprite attack_special_return RIGHT 392 767 42 59 14 58
 sprite attack_special_return RIGHT 392 767 42 59 14 58
 
 parameter attack_short animation_speed 0.175
-sprite attack_short RIGHT 213 477 42 59 10 58
-sprite attack_short RIGHT 267 465 29 71 7 70
-sprite attack_short RIGHT 305 464 69 72 21 71
-sprite attack_short RIGHT 305 464 69 72 21 71
-sprite attack_short RIGHT 267 465 29 71 7 70
-sprite attack_short RIGHT 213 477 42 59 10 58
+sprite attack_short RIGHT 577 324 42 59 10 58
+sprite attack_short RIGHT 577 395 29 71 7 70
+sprite attack_short RIGHT 577 478 69 72 21 71
+sprite attack_short RIGHT 577 478 69 72 21 71
+sprite attack_short RIGHT 577 395 29 71 7 70
+sprite attack_short RIGHT 577 324 42 59 10 58
 
 sprite grab_and_throw RIGHT 360 211 55 47 24 45
 sprite grab_and_throw RIGHT 424 204 39 54 25 52
@@ -145,24 +145,24 @@ sprite stunned_1 RIGHT 361 681 44 40 15 38
 sprite stunned_1 RIGHT 361 681 44 40 15 38
 
 parameter stunned_2 sound hit_rap
-sprite stunned_2 RIGHT 308 685 42 36 15 34
-sprite stunned_2 RIGHT 361 681 44 40 15 38
-sprite stunned_2 RIGHT 361 681 44 40 15 38
-sprite stunned_2 RIGHT 361 681 44 40 15 38
-sprite stunned_2 RIGHT 361 681 44 40 15 38
+sprite stunned_2 RIGHT 577 562 42 36 15 34
+sprite stunned_2 RIGHT 577 610 44 40 15 38
+sprite stunned_2 RIGHT 577 610 44 40 15 38
+sprite stunned_2 RIGHT 577 610 44 40 15 38
+sprite stunned_2 RIGHT 577 610 44 40 15 38
 
-sprite knock_down RIGHT 133 664 58 55 37 37
-sprite knock_down RIGHT 207 697 77 24 49 17
+sprite knock_down RIGHT 577 662 58 55 37 37
+sprite knock_down RIGHT 577 729 77 24 49 17
 
-sprite stand_up RIGHT 308 685 42 36 15 34
+sprite stand_up RIGHT 577 765 42 36 15 34
 
 sprite mounting RIGHT 4 573 60 55 16 53
 sprite mounted_side RIGHT 75 581 38 48 10 28
-sprite mounted_side_flip LEFT 75 581 38 48 10 28
+sprite mounted_side_flip LEFT 577 813 38 48 10 28
 sprite mounted_down RIGHT 127 580 30 48 18 26
-sprite mounted_down_flip LEFT 127 580 30 48 18 26
+sprite mounted_down_flip LEFT 577 873 30 48 18 26
 sprite mounted_up RIGHT 171 580 31 48 8 26
-sprite mounted_up_flip LEFT 171 580 31 48 8 26
+sprite mounted_up_flip LEFT 577 933 31 48 8 26
 
 parameter resting wakeup_delay_time 2000
 sprite resting RIGHT 473 135 43 30 16 28
@@ -174,9 +174,9 @@ parameter dying sound male_dead
 parameter dying animation_speed 0.5
 parameter dying animation_loop true
 sprite dying RIGHT 207 649 77 24 49 17
-sprite dying RIGHT 207 697 77 24 49 17
+sprite dying RIGHT 577 993 77 24 49 17
 
-sprite dead RIGHT 207 649 77 24 49 17
+sprite dead RIGHT 577 1029 77 24 49 17
 
 
 # --- colliders ---
@@ -281,3 +281,24 @@ point grab 408 238
 point grab 441 211
 point grab 540 191
 
+collider BODY NONE 590 1 19 53
+collider BODY NONE 580 42 10 13
+collider BODY NONE 597 80 20 56
+collider BODY NONE 588 120 9 17
+collider BODY NONE 590 173 20 55
+collider BODY NONE 580 212 10 17
+collider BODY NONE 594 256 16 55
+collider BODY NONE 580 296 14 16
+collider ATTACK 8 2 STUNNED_2 610 264 13 13
+collider BODY NONE 583 326 16 57
+collider BODY NONE 577 406 17 24
+collider BODY NONE 586 430 20 36
+collider BODY NONE 588 486 15 21
+collider BODY NONE 599 506 12 43
+collider ATTACK 8 2 KNOCK_DOWN 610 503 36 47
+collider BODY NONE 581 817 14 48
+collider BODY NONE 582 874 21 51
+collider BODY NONE 581 934 20 51
+collider BODY NONE 589 613 19 37
+collider BODY NONE 578 640 11 10
+collider FIRE GRAB_AND_THROW 592 610 13 42
