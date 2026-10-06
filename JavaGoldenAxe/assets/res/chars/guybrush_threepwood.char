@@ -133,28 +133,28 @@ sprite grab_and_throw RIGHT 424 204 39 54 25 52
 sprite grab_and_throw RIGHT 484 187 56 71 19 69
 sprite grab_and_throw RIGHT 484 187 56 71 19 69
 
-sprite thrown RIGHT 308 685 42 36 15 22
-sprite thrown RIGHT 207 697 77 24 41 17
-sprite thrown RIGHT 133 664 58 55 37 37
+sprite thrown RIGHT 1022 649 60 46 30 27
+sprite thrown RIGHT 1022 707 90 24 45 17
+sprite thrown RIGHT 1022 743 60 55 30 37
 
 parameter stunned_1 sound hit
-sprite stunned_1 RIGHT 13 666 36 55 17 53
-sprite stunned_1 RIGHT 361 681 44 40 15 38
-sprite stunned_1 RIGHT 361 681 44 40 15 38
-sprite stunned_1 RIGHT 361 681 44 40 15 38
-sprite stunned_1 RIGHT 361 681 44 40 15 38
+sprite stunned_1 RIGHT 1022 365 46 59 23 57
+sprite stunned_1 RIGHT 1022 436 52 59 23 57
+sprite stunned_1 RIGHT 1022 436 52 59 23 57
+sprite stunned_1 RIGHT 1022 436 52 59 23 57
+sprite stunned_1 RIGHT 1022 436 52 59 23 57
 
 parameter stunned_2 sound hit_rap
-sprite stunned_2 RIGHT 577 562 42 36 15 34
-sprite stunned_2 RIGHT 577 610 44 40 15 38
-sprite stunned_2 RIGHT 577 610 44 40 15 38
-sprite stunned_2 RIGHT 577 610 44 40 15 38
-sprite stunned_2 RIGHT 577 610 44 40 15 38
+sprite stunned_2 RIGHT 1022 507 50 59 23 57
+sprite stunned_2 RIGHT 1022 578 52 59 23 57
+sprite stunned_2 RIGHT 1022 578 52 59 23 57
+sprite stunned_2 RIGHT 1022 578 52 59 23 57
+sprite stunned_2 RIGHT 1022 578 52 59 23 57
 
-sprite knock_down RIGHT 577 662 58 55 37 37
-sprite knock_down RIGHT 577 729 77 24 49 17
+sprite knock_down RIGHT 1022 116 58 57 29 38
+sprite knock_down RIGHT 1022 185 77 57 38 33
 
-sprite stand_up RIGHT 577 765 42 36 15 34
+sprite stand_up RIGHT 1022 296 42 57 15 55
 
 sprite mounting RIGHT 4 573 60 55 16 53
 sprite mounted_side RIGHT 75 581 38 48 10 28
@@ -165,7 +165,7 @@ sprite mounted_up RIGHT 171 580 31 48 8 26
 sprite mounted_up_flip LEFT 577 933 31 48 8 26
 
 parameter resting wakeup_delay_time 2000
-sprite resting RIGHT 473 135 43 30 16 28
+sprite resting RIGHT 1022 254 90 30 45 28
 
 sprite magic RIGHT 658 1518 32 67 16 63
 sprite magic RIGHT 658 1597 44 85 22 81
@@ -173,10 +173,10 @@ sprite magic RIGHT 658 1597 44 85 22 81
 parameter dying sound male_dead
 parameter dying animation_speed 0.5
 parameter dying animation_loop true
-sprite dying RIGHT 207 649 77 24 49 17
-sprite dying RIGHT 577 993 77 24 49 17
+sprite dying RIGHT 1022 44 90 24 45 17
+sprite dying RIGHT 1022 80 90 24 45 17
 
-sprite dead RIGHT 577 1029 77 24 49 17
+sprite dead RIGHT 1022 0 77 32 38 21
 
 
 # --- colliders ---
@@ -363,3 +363,9 @@ sprite walking_side RIGHT 980 486 27 58 13 55
 parameter walking_side animation_speed 0.1
 parameter walking_side animation_loop true
 parameter walking_side idle_delay_time 500
+collider BODY NONE 1042 458 19 37
+collider BODY NONE 1031 485 11 10
+collider FIRE GRAB_AND_THROW 1045 455 13 42
+collider BODY NONE 1042 600 19 37
+collider BODY NONE 1031 627 11 10
+collider FIRE GRAB_AND_THROW 1045 597 13 42

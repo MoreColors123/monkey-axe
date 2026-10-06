@@ -40,7 +40,9 @@ GAP = 12
 
 # Animations whose frames must fit the cycle at full scale.
 ANIMS = ["attack_1", "attack_2", "attack_3", "attack_5", "attack_6",
-         "attack_7", "attack_short", "magic", "walking_side"]
+         "attack_7", "attack_short", "magic", "walking_side",
+         "stunned_1", "stunned_2", "knock_down", "stand_up",
+         "thrown", "dying", "dead", "resting"]
 
 
 def parse(lines):
@@ -140,16 +142,31 @@ def main():
                 print(f"  !! {anim}: sprite {sp_id} not in sprites.json")
                 continue
             (x, y, w, h, cx, cy) = rect
-            half = math.ceil(base * sp["w"] / 2)
-            need_cy = math.ceil(base * sp["h"])
-            d_cx = max(0, half - cx)
-            d_cy = max(0, need_cy - cy)
-            n_cx = cx + d_cx
-            n_w = max(w + d_cx, n_cx + half)
-            n_cy = cy + d_cy
-            n_h = h + d_cy
-            if d_cx == 0 and d_cy == 0 and n_w == w:
-                continue  # already fits
+            mode = (mapping["animations"].get(anim)
+                    or mapping["animations"]["idle"]).get("mode", "bottom")
+            if mode == "center":
+                # centre-mode: the sprite is fitted to the box and vertically
+                # centred, so the BOX must grow around it. Preserve the art's
+                # vertical offset to the actor (h/2 - cy) so hitboxes and the
+                # figure stay aligned; the art is horizontally centred on the
+                # actor regardless of cx, so cx just needs to allow the width.
+                n_w = max(w, math.ceil(base * sp["w"]) + 2)
+                n_h = max(h, math.ceil(base * sp["h"]) + 2)
+                n_cx = n_w // 2
+                n_cy = (n_h - (h - 2 * cy)) // 2
+                if (n_w, n_h, n_cx, n_cy) == (w, h, cx, cy):
+                    continue
+            else:
+                half = math.ceil(base * sp["w"] / 2)
+                need_cy = math.ceil(base * sp["h"])
+                d_cx = max(0, half - cx)
+                d_cy = max(0, need_cy - cy)
+                n_cx = cx + d_cx
+                n_w = max(w + d_cx, n_cx + half)
+                n_cy = cy + d_cy
+                n_h = h + d_cy
+                if d_cx == 0 and d_cy == 0 and n_w == w:
+                    continue  # already fits
             nx, ny = base_x, next_y
             next_y += n_h + GAP
             new_rects.append((anim, (nx, ny, n_w, n_h, n_cx, n_cy), rect))
