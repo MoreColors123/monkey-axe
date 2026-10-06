@@ -24,8 +24,14 @@ else {
 }
 
 # Always refresh resources so edited sprites/animations are picked up.
+# NOTE: Copy-Item -Recurse into an existing destination directory nests the
+# source folder (build-custom\res\res) instead of merging its contents, which
+# silently left the game running stale assets. Remove the destination first.
 Write-Host "Copying resources..."
-Copy-Item -Recurse -Force (Join-Path $proj 'assets\res') (Join-Path $out 'res')
+$resSrc = Join-Path $proj 'assets\res'
+$resDst = Join-Path $out 'res'
+if (Test-Path $resDst) { Remove-Item -Recurse -Force $resDst }
+Copy-Item -Recurse -Force $resSrc $resDst
 
 Write-Host "Starting Golden Axe..."
 & java -cp $out main.Main
