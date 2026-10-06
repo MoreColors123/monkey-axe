@@ -18,6 +18,7 @@ HERE = Path(__file__).resolve().parent
 REVIEWER = HERE / "reviewer.html"
 MAPPING = HERE / "mapping.json"
 BACKUP = HERE / "mapping.backup.json"
+SUGGESTIONS = HERE / "suggestions.json"
 HOST = "127.0.0.1"
 PORTS = list(range(8765, 8776))
 
@@ -43,6 +44,28 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, "not found")
 
     def do_POST(self):
+        if self.path == "/api/suggestions":
+            # The page persists approve/dismiss status and comments here, so
+            # they survive a reload and the agent can read them back.
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                data = json.loads(self.rfile.read(length).decode("utf-8"))
+            except Exception as exc:  # noqa: BLE001
+                self._send(400, "bad json: " + str(exc))
+                return
+            if not isinstance(data, dict) or not isinstance(data.get("suggestions"), list):
+                self._send(400, "refusing to save: missing 'suggestions' list")
+                return
+            try:
+                tmp = SUGGESTIONS.with_suffix(".json.tmp")
+                tmp.write_text(json.dumps(data, indent=1), encoding="utf-8")
+                tmp.replace(SUGGESTIONS)  # atomic swap
+            except OSError as exc:
+                self._send(500, "write failed: " + str(exc))
+                return
+            print("saved suggestions.json")
+            self._send(200, "ok")
+            return
         if self.path != "/api/save":
             self._send(404, "not found")
             return

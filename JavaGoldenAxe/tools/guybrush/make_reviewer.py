@@ -66,6 +66,11 @@ def parse_char(char_name):
 def main():
     sprites = json.loads((HERE / "sprites.json").read_text())
     mapping = json.loads((HERE / "mapping.json").read_text())
+    # Proposed mappings written by the agent (suggestions.json): shown in the
+    # Suggestions bar with approve/dismiss/comment controls.
+    sugg_path = HERE / "suggestions.json"
+    suggestions = (json.loads(sugg_path.read_text())
+                   if sugg_path.exists() else {"suggestions": []})
     order, ga, speeds, loops = parse_char("guybrush_threepwood.char")
     # The vanilla layout, for the original (Ax) preview. If the layout has been
     # de-shared, the new rectangles do not exist in ax_battler.png, so the
@@ -100,6 +105,7 @@ def main():
         "origGa": orig_ga,
         "speed": speeds,
         "loop": loops,
+        "suggestions": suggestions,
     }
 
     html = TEMPLATE.replace("/*__DATA__*/", "const DATA = " + json.dumps(data) + ";")
@@ -172,6 +178,19 @@ TEMPLATE = r"""<!doctype html>
   table.recttable tr.borrowed { outline:2px solid #ff9d2e; outline-offset:-2px; }
   table.recttable td.mono { font-family:monospace; }
   table.recttable button { padding:1px 6px; font-size:11px; margin-right:3px; }
+  #suggbarwrap { max-height:60vh; overflow:auto; padding:8px; }
+  .sugg { border:1px solid #3a4050; border-radius:6px; padding:8px; margin:8px 0; background:#161920; }
+  .sugg.approved { opacity:.8; border-color:#2f6f3e; }
+  .sugg.dismissed { opacity:.55; border-color:#555; }
+  .sugg .st { font-size:11px; padding:1px 7px; border-radius:8px; margin-left:8px; color:#fff; }
+  .sugg .st.proposed { background:#2a4b8a; }
+  .sugg .st.approved { background:#2f6f3e; }
+  .sugg .st.dismissed { background:#555; }
+  .sugg .strip { display:flex; flex-wrap:wrap; gap:4px; margin:5px 0; }
+  .sugg .strip .t { text-align:center; font-family:monospace; font-size:10px; color:#9ab; background:#22262e; border:1px solid #444; border-radius:4px; padding:2px; cursor:pointer; }
+  .sugg .strip .t:hover { border-color:#ffea00; }
+  .sugg .curhint { color:#98a; font-size:11px; margin-top:6px; }
+  .sugg textarea { width:100%; background:#0c0e12; color:#bfe; border:1px solid #333; border-radius:5px; font-family:monospace; font-size:11px; margin-top:6px; }
   .legend span { display:inline-block; margin-right:14px; }
   .swatch { display:inline-block; width:11px; height:11px; vertical-align:-1px; border:1px solid #555; }
   #err { display:none; background:#7a2020; color:#fff; padding:6px 12px; font-family:monospace; white-space:pre-wrap; }
@@ -210,6 +229,12 @@ TEMPLATE = r"""<!doctype html>
           <span id="rectselinfo" style="margin-left:12px"></span>
         </div>
         <div id="rectsbody"></div>
+      </div>
+    </details>
+    <details class="rectbar" id="suggbar" open>
+      <summary>Suggestions <span id="suggcount" class="hint"></span></summary>
+      <div id="suggbarwrap">
+        <div id="suggbody"></div>
       </div>
     </details>
     <div id="editor">
@@ -300,9 +325,18 @@ TEMPLATE = r"""<!doctype html>
     <p>After running <code>deshare.py</code> no rectangle is shared, so each animation owns its
        own and overrides are rarely needed.</p>
 
+    <h3>Suggestions</h3>
+    <p>Proposed mappings (written to <code>suggestions.json</code> by the agent) appear in the
+       <b>Suggestions</b> bar: the proposed frame strip next to the animation's current frames.
+       <b>Approve</b> applies the proposal to the page (then <b>Export mapping.json</b> keeps it);
+       <b>Dismiss</b> rejects it; <b>Reopen</b> re-opens a handled one. The comment box is saved
+       back to <code>suggestions.json</code> for the agent to read - as are the statuses, which
+       survive a reload when the page runs via <code>serve_reviewer.py</code>.</p>
+
     <h3>the sections</h3>
     <p><b>Sheet</b> — the source sprite sheet (left). <b>Animations</b> — the list of
        animations (click one to edit it). <b>Rectangles</b> — the atlas-slot editor.
+       <b>Suggestions</b> — the agent's proposed mappings with approve/dismiss/comment.
        <b>Animation settings</b> — mode/scale for the current animation. <b>Preview</b> —
        original vs new, playing together. <b>Baked frames</b> — what actually bakes.
        <b>Frame list</b> — the source sprites that make up the animation (editable).</p>
@@ -627,6 +661,112 @@ function rectThumb(id){
   cv.style.marginRight = '5px'; cv.style.verticalAlign = 'middle';
   return cv;
 }
+// ---- suggestions (proposed mappings from the agent, via suggestions.json) ----
+let suggestions = (DATA.suggestions && Array.isArray(DATA.suggestions.suggestions))
+  ? DATA.suggestions.suggestions : [];
+async function saveSuggestions(){
+  if (location.protocol === 'file:') { toast('opened as a file - suggestion state not saved'); return; }
+  try {
+    const r = await fetch('/api/suggestions', {method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({suggestions: suggestions})});
+    if (!r.ok) throw new Error((await r.text()).trim() || ('HTTP ' + r.status));
+  } catch(err){ toast('saving suggestion state failed: ' + err.message); }
+}
+function suggThumb(id, small){
+  const sp = S[id];
+  const wrap = document.createElement('div'); wrap.className = 't';
+  if (sp && imgSource){
+    const cv = document.createElement('canvas');
+    const mw = small ? 26 : 52, mh = small ? 30 : 60;
+    const sc = Math.min(mw/sp.w, mh/sp.h);
+    cv.width = Math.max(1, Math.round(sp.w*sc)); cv.height = Math.max(1, Math.round(sp.h*sc));
+    const x = cv.getContext('2d'); x.imageSmoothingEnabled = false;
+    x.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h, 0, 0, cv.width, cv.height);
+    wrap.appendChild(cv);
+  }
+  const lab = document.createElement('div'); lab.textContent = id; wrap.appendChild(lab);
+  wrap.title = id + ' - click to select it on the sheet';
+  wrap.onclick = () => { if (sp){ selected = sp; showInfo(); drawSheet(); drawFrames(); } };
+  return wrap;
+}
+function setSuggStatus(s, status){
+  s.status = status;
+  saveSuggestions();
+  renderSuggestions();
+}
+function approveSuggestion(s){
+  pushHistory();
+  const e = entry(s.animation);
+  e.mode = s.mode || 'bottom';
+  if (s.scale != null) e.scale = s.scale; else delete e.scale;
+  e.frames = (s.frames || []).slice();
+  s.status = 'approved';
+  saveSuggestions();
+  refresh();
+  toast('applied to ' + s.animation + ' - Export mapping.json to keep it');
+}
+function renderSuggestions(){
+  const el = document.getElementById('suggbody');
+  if (!el) return;
+  el.innerHTML = '';
+  const open = suggestions.filter(s => (s.status || 'proposed') === 'proposed').length;
+  const cnt = document.getElementById('suggcount');
+  if (cnt) cnt.textContent = suggestions.length + ' total, ' + open + ' open';
+  if (!suggestions.length){
+    el.innerHTML = '<div class="hint">No suggestions right now. Proposals are written to suggestions.json and appear here after ReviewSprites.bat regenerates the page.</div>';
+    return;
+  }
+  for (const s of suggestions){
+    const status = s.status || 'proposed';
+    const card = document.createElement('div');
+    card.className = 'sugg ' + status;
+    const head = document.createElement('div');
+    const nm = document.createElement('b'); nm.textContent = s.animation; head.appendChild(nm);
+    const st = document.createElement('span'); st.className = 'st ' + status; st.textContent = status; head.appendChild(st);
+    card.appendChild(head);
+    if (s.note){ const n = document.createElement('div'); n.className = 'hint'; n.textContent = s.note; card.appendChild(n); }
+    const pl = document.createElement('div'); pl.className = 'curhint'; pl.textContent = 'proposed frames:'; card.appendChild(pl);
+    const strip = document.createElement('div'); strip.className = 'strip';
+    (s.frames || []).forEach(id => strip.appendChild(suggThumb(id)));
+    card.appendChild(strip);
+    // current frames for comparison; read without entry() so nothing is created
+    const curIds = ((mapping.animations[s.animation] || {}).frames || []);
+    const cl = document.createElement('div'); cl.className = 'curhint'; cl.textContent = 'current frames:' + (curIds.length ? '' : ' (falls back to idle)');
+    card.appendChild(cl);
+    const cstrip = document.createElement('div'); cstrip.className = 'strip';
+    curIds.forEach(id => cstrip.appendChild(suggThumb(id, true)));
+    card.appendChild(cstrip);
+    const row = document.createElement('div'); row.className = 'row';
+    if (status !== 'approved'){
+      const ab = document.createElement('button'); ab.className = 'primary'; ab.textContent = 'Approve';
+      ab.title = 'apply these frames to ' + s.animation + ' in the page, then Export mapping.json to keep them';
+      ab.onclick = () => approveSuggestion(s);
+      row.appendChild(ab);
+    }
+    if (status !== 'dismissed'){
+      const db = document.createElement('button'); db.textContent = 'Dismiss';
+      db.title = 'mark this proposal as rejected (kept for the record)';
+      db.onclick = () => setSuggStatus(s, 'dismissed');
+      row.appendChild(db);
+    }
+    if (status !== 'proposed'){
+      const rb = document.createElement('button'); rb.textContent = 'Reopen';
+      rb.onclick = () => setSuggStatus(s, 'proposed');
+      row.appendChild(rb);
+    }
+    card.appendChild(row);
+    const ta = document.createElement('textarea'); ta.rows = 2;
+    ta.placeholder = 'comment for the agent - what to change about this proposal';
+    ta.value = s.comment || '';
+    // keep in-memory while typing so a panel refresh does not lose the draft
+    ta.oninput = () => { s.comment = ta.value; };
+    const cb = document.createElement('button'); cb.textContent = 'Save comment';
+    cb.onclick = () => { s.comment = ta.value; saveSuggestions(); toast('comment saved for ' + s.animation); };
+    card.appendChild(ta); card.appendChild(cb);
+    el.appendChild(card);
+  }
+}
 function renderRects(){
   const el = document.getElementById('rectsbody');
   if (!el) return;
@@ -843,6 +983,7 @@ function refresh(){
     `speed ${(DATA.speed[selAnim]!=null?DATA.speed[selAnim]:0.1)} = ${Math.round(realFps(selAnim)*10)/10} fps - ${loop?'loops':'plays once'}`;
   PLAN = buildPlan();
   renderAnimList(); drawFilm(); drawFrames(); drawAnimPreview(); showInfo();
+  renderSuggestions();
   const rb = document.getElementById('rectsbar');
   if (rb && rb.open) renderRects();
 }
