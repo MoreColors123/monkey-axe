@@ -350,3 +350,16 @@ collider BODY NONE 685 1386 20 36
 collider BODY NONE 670 1442 15 21
 collider BODY NONE 681 1462 12 43
 collider ATTACK 8 2 KNOCK_DOWN 692 1459 36 47
+
+# --- walking_side: profile walk for horizontal movement (engine patch) ---
+sprite walking_side RIGHT 734 1690 23 47 11 44
+sprite walking_side RIGHT 763 1690 23 47 11 44
+sprite walking_side RIGHT 792 1690 23 47 11 44
+sprite walking_side RIGHT 821 1690 26 47 13 44
+sprite walking_side RIGHT 853 1690 26 47 13 44
+sprite walking_side RIGHT 885 1690 26 47 13 44
+sprite walking_side RIGHT 917 1690 26 47 13 44
+sprite walking_side RIGHT 949 1690 27 47 13 44
+parameter walking_side animation_speed 0.1
+parameter walking_side animation_loop true
+parameter walking_side idle_delay_time 500

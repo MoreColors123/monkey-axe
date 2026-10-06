@@ -1403,6 +1403,11 @@ public class Actor extends Entity implements Comparable<Actor> {
         @Override
         public void fixedUpdate() {
             updateControl();
+            if (GoldenAxeGame.DEBUG_STATE_SWITCH && control == PLAYER_1) {
+                System.out.println("[walk] vx=" + vx + " vz=" + vz
+                    + " dir=" + direction
+                    + " anim=" + animationPlayer.getCurrentAnimation().getName());
+            }
             if (fireControlEnabled && jumpControlEnabled) {
                 stateManager.switchTo("attack_special");
                 return;
@@ -1462,8 +1467,19 @@ public class Actor extends Entity implements Comparable<Actor> {
             if (vx != 0 || vz != 0) {
                 updateIdleTime();
                 animationPlayer.update();
-                animationPlayer.setAnimation(
-                        vz >= 0 ? "walking_down" : "walking_up", false);
+                // horizontal-only movement plays the optional "walking_side"
+                // profile walk when the character provides one (Guybrush mod);
+                // vanilla characters (no such animation) keep the original
+                // walking_down/up behaviour.
+                if (vz == 0 && animationPlayer.isAnimationAvailable(
+                                                    "walking_side")) {
+                    
+                    animationPlayer.setAnimation("walking_side", false);
+                }
+                else {
+                    animationPlayer.setAnimation(
+                            vz >= 0 ? "walking_down" : "walking_up", false);
+                }
             }
             else if (getTime() >= idleTime) {
                 animationPlayer.update();
