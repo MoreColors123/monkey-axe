@@ -200,9 +200,9 @@ parameter dying animation_loop true
 sprite dying RIGHT 1022 44 90 24 45 17
 sprite dying RIGHT 1022 80 90 24 45 17
 
-sprite dead RIGHT 1022 0 77 32 38 21
-sprite dead RIGHT 1116 211 55 34 27 17
-sprite dead RIGHT 1116 257 53 34 26 17
+sprite dead RIGHT 2328 0 84 38 42 24
+sprite dead RIGHT 2328 148 84 38 42 19
+sprite dead RIGHT 2328 296 84 38 42 19
 sprite dead RIGHT 1116 303 115 44 57 22
 sprite dead RIGHT 1116 359 199 65 99 32
 

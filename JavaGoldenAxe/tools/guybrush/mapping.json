@@ -272,11 +272,7 @@
   "dead": {
    "mode": "center",
    "frames": [
-    "s0316",
-    "s0428",
-    "s0455",
-    "s0587",
-    "s0521"
+    "s0433"
    ]
   },
   "walking_side": {
