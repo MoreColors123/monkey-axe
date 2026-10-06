@@ -210,9 +210,13 @@ public class Title extends State<GoldenAxeGame, SceneManager>
                 gameStartOptionVisible = true;
             }
             case "show_intro" -> {
-                Audio.stopMusic();
-                GoldenAxeGame.setNextDemoCharacter();
-                manager.switchTo("intro");
+                // TESTING: ignore the attract intro while SKIP_INTRO is set -
+                // stay on the title until 1P START (see GoldenAxeGame.SKIP_INTRO).
+                if (!GoldenAxeGame.SKIP_INTRO) {
+                    Audio.stopMusic();
+                    GoldenAxeGame.setNextDemoCharacter();
+                    manager.switchTo("intro");
+                }
             }
         }
     }

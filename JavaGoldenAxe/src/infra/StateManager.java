@@ -46,6 +46,9 @@ public class StateManager<T, S> {
     }
 
     public State<T, S> switchTo(String stateName) { 
+        if (GoldenAxeGame.DEBUG_STATE_SWITCH) {
+            System.out.println("[state] -> " + stateName);
+        }
         if (currentState == null) {
             currentState = states.get(stateName);
             currentState.onEnter();

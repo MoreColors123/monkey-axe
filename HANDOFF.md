@@ -41,6 +41,15 @@ Launchers (double-click, all in the repo root):
 * `BuildSprites.bat` — bakes `mapping.json` into the game sprites.
 * `run.ps1` — the engine behind the bats; `.\run.ps1 -Rebuild` forces recompile.
 
+Testing toggles (in `src/infra/GoldenAxeGame.java`):
+* `SKIP_INTRO = true` — the title never fires the attract intro (`title.ani`'s
+  show_intro event), so no intro cutscene/demo; set `false` to restore.
+* `DEBUG_STATE_SWITCH` — prints every state switch to the console (temporary
+  diagnosis aid; remove once done).
+* Stage 1's walk-in + opening dialogue are skipped in
+  `assets/res/stage/stage_1.inf` (players spawn in `walking` at the arena; the
+  original lines are commented right there — swap to restore).
+
 `run.ps1` compiles all `src/**.java` into `JavaGoldenAxe/build-custom/` and
 **always re-copies** `assets/res` there, so asset edits show up on next launch.
 The engine reads `/res/...` off the classpath, i.e. `build-custom\res\...`.

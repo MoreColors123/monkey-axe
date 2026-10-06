@@ -38,6 +38,14 @@ public class GoldenAxeGame {
     
     public static int introIndex = 0;
     public static boolean showingDemo = false;
+    // TESTING TOGGLES
+    // When true, the title screen never fires the attract intro (title.ani's
+    // show_intro event is ignored), so you stay on the title until 1P START.
+    // Set to false to restore the normal attract flow (intro cutscene + demo).
+    public static boolean SKIP_INTRO = true;
+    // When true, every player state switch is printed to the console
+    // (diagnosing "only runs left/right"). Remove once diagnosed.
+    public static boolean DEBUG_STATE_SWITCH = true;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;
