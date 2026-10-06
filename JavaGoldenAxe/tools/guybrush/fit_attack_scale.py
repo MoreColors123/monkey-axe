@@ -40,7 +40,7 @@ GAP = 12
 
 # Animations whose frames must fit the cycle at full scale.
 ANIMS = ["attack_1", "attack_2", "attack_3", "attack_5", "attack_6",
-         "attack_7", "attack_short", "magic"]
+         "attack_7", "attack_short", "magic", "walking_side"]
 
 
 def parse(lines):
