@@ -1,3 +1,35 @@
 {
- "suggestions": []
+ "suggestions": [
+  {
+   "animation": "dying",
+   "mode": "center",
+   "frames": [
+    "s0207",
+    "s0208"
+   ],
+   "note": "Collapse backward, 2 frames: falling back (s0207) -> flat on the ground (s0208, held). Currently both frames are the flat pose - no fall. Candidate s0705/s0708 exist as forward-dive alternatives.",
+   "status": "proposed",
+   "comment": ""
+  },
+  {
+   "animation": "dead",
+   "mode": "center",
+   "frames": [
+    "s0433"
+   ],
+   "note": "Face-down flat, held. REPLACES the current 5-frame pick whose frames 2-5 are junk (dog / multi-figure sprites - those were invisible until the frames were allocated). Alternatives: s0450 (on back, knees bent), s0316 (curled on side).",
+   "status": "proposed",
+   "comment": ""
+  },
+  {
+   "animation": "resting",
+   "mode": "center",
+   "frames": [
+    "s0450"
+   ],
+   "note": "On the back, knees bent - reads as relaxing instead of the current flat-flight pose. Alternative: keep s0208 (face-up flat) or s0433 (face-down).",
+   "status": "proposed",
+   "comment": ""
+  }
+ ]
 }
