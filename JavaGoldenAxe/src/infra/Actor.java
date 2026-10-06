@@ -1514,6 +1514,7 @@ public class Actor extends Entity implements Comparable<Actor> {
         public void fixedUpdate() {
             updateControl();
             if (attacking) {
+                animationPlayer.update(); // advance the lunge animation
                 updateMovement();
                 direction = attackingDirection;
                 if (vy == 0.0) {
@@ -1616,7 +1617,18 @@ public class Actor extends Entity implements Comparable<Actor> {
             
             if (onFloor) {
                 stateManager.switchTo("walking");
-            } 
+            }
+            else if (attacking) {
+                // advance the jumping_attack / jumping_death_stab animation
+                // while it is held (vanilla: single-frame poses, so this is a
+                // no-op; multi-frame characters animate their sequences)
+                String a = animationPlayer.getCurrentAnimation().getName();
+                if (a.equals("jumping_attack")
+                        || a.equals("jumping_death_stab")) {
+                    
+                    animationPlayer.update();
+                }
+            }
         }
         
     }

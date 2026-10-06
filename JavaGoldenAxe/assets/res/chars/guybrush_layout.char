@@ -35,14 +35,15 @@ sprite running RIGHT 56 203 39 56 21 55
 sprite running RIGHT 113 203 45 56 24 55
 sprite running RIGHT 174 202 39 56 21 55
 
-sprite running_attack RIGHT 240 209 44 48 21 52
+sprite running_attack RIGHT 1116 140 44 59 21 63
+sprite running_attack RIGHT 1116 436 45 57 22 55
 
 sprite jumping RIGHT 401 460 44 78 30 78
 sprite jumping RIGHT 462 457 30 79 9 79
 
-sprite jumping_attack RIGHT 512 464 61 69 13 69
+sprite jumping_attack RIGHT 1116 0 78 69 30 69
 
-sprite jumping_death_stab RIGHT 515 556 48 47 27 46
+sprite jumping_death_stab RIGHT 1116 81 60 47 30 46
 
 parameter attack_1 sound attack_swing
 parameter attack_1 animation_speed 0.175
@@ -177,6 +178,10 @@ sprite dying RIGHT 1022 44 90 24 45 17
 sprite dying RIGHT 1022 80 90 24 45 17
 
 sprite dead RIGHT 1022 0 77 32 38 21
+sprite dead RIGHT 1116 211 55 34 27 17
+sprite dead RIGHT 1116 257 53 34 26 17
+sprite dead RIGHT 1116 303 115 44 57 22
+sprite dead RIGHT 1116 359 199 65 99 32
 
 
 # --- colliders ---
@@ -369,3 +374,19 @@ collider FIRE GRAB_AND_THROW 1045 455 13 42
 collider BODY NONE 1042 600 19 37
 collider BODY NONE 1031 627 11 10
 collider FIRE GRAB_AND_THROW 1045 597 13 42
+collider BODY NONE 1134 441 12 46
+collider BODY NONE 1119 470 15 16
+collider ATTACK 8 2 KNOCK_DOWN 1146 440 9 48
+collider BODY NONE 1133 153 12 46
+collider BODY NONE 1134 441 12 46
+collider BODY NONE 1118 182 15 16
+collider BODY NONE 1119 470 15 16
+collider ATTACK 8 2 KNOCK_DOWN 1145 152 9 48
+collider ATTACK 8 2 KNOCK_DOWN 1146 440 9 48
+collider BODY NONE 1136 31 20 38
+collider BODY NONE 1144 22 21 9
+collider ATTACK 8 2 KNOCK_DOWN 1156 2 36 65
+collider BODY NONE 1135 88 23 34
+collider BODY NONE 1121 114 14 11
+collider BODY NONE 1146 82 21 10
+collider ATTACK 8 2 KNOCK_DOWN 1149 93 11 34

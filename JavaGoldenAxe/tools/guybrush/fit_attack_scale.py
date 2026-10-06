@@ -42,7 +42,8 @@ GAP = 12
 ANIMS = ["attack_1", "attack_2", "attack_3", "attack_5", "attack_6",
          "attack_7", "attack_short", "magic", "walking_side",
          "stunned_1", "stunned_2", "knock_down", "stand_up",
-         "thrown", "dying", "dead", "resting"]
+         "thrown", "dying", "dead", "resting",
+         "running_attack", "jumping_attack", "jumping_death_stab"]
 
 
 def parse(lines):
@@ -177,6 +178,60 @@ def main():
                     out[i] = (f"sprite {a2} RIGHT {nx} {ny} {n_w} {n_h} "
                               f"{n_cx} {n_cy}")
 
+    # ---- allocate missing frames (Phase 2b): a mapped frame list longer than
+    # the layout's rectangles means frames 2..n never bake ("(extra)" in the
+    # reviewer). Allocate fresh rectangles so every distinct mapped id gets
+    # one, appended to the animation's block, with the first existing rect's
+    # colliders/points cloned anchor-relative (the lunge/stab keeps its
+    # hitbox on the new frames).
+    for anim in sorted(assign):
+        entry = mapping["animations"].get(anim) or mapping["animations"]["idle"]
+        ids = entry.get("frames") or mapping["animations"]["idle"]["frames"]
+        rects = [r for (r, _sid) in assign[anim]]
+        # distinct ids in list order; the baker assigns ids[i % len(ids)] to
+        # rect i, so max(distinct, existing) rects cover every distinct pose
+        distinct_ids = list(dict.fromkeys(ids))
+        target = max(len(distinct_ids), len(rects))
+        if target <= len(rects):
+            continue
+        base = entry.get("scale") or global_scale
+        mode = entry.get("mode", "bottom")
+        insert_at = max(i for (i, a2, *_rest) in sprites if a2 == anim) + 1
+        (ox, oy, ow, oh, ocx, ocy) = rects[0]
+        added = []
+        for k in range(len(rects), target):
+            sp = sheet.get(ids[k % len(ids)])
+            if not sp:
+                print(f"  !! {anim}: sprite {ids[k % len(ids)]} not in sprites.json")
+                continue
+            n_w = math.ceil(base * sp["w"]) + 2
+            n_h = math.ceil(base * sp["h"]) + 2
+            n_cx = n_w // 2
+            n_cy = (n_h - 2) if mode != "center" else (n_h // 2)
+            nx, ny = base_x, next_y
+            next_y += n_h + GAP
+            out.insert(insert_at,
+                       f"sprite {anim} RIGHT {nx} {ny} {n_w} {n_h} {n_cx} {n_cy}")
+            insert_at += 1
+            added.append((anim, (nx, ny, n_w, n_h, n_cx, n_cy), rects[0]))
+        new_rects.extend(added)
+        for (_i, head, px, py, pw, ph) in colliders:
+            if not (px + pw <= ox or ox + ow <= px or py + ph <= oy or oy + oh <= py):
+                for (_a, (nx, ny, nw_, nh_, ncx, ncy), _old) in added:
+                    tx = nx + ncx + (px - (ox + ocx))
+                    ty = ny + ncy + (py - (oy + ocy))
+                    out.append(" ".join(["collider"] + head[1:]
+                                        + [str(tx), str(ty), str(pw), str(ph)]))
+        for (_i, head, px, py) in points:
+            if ox <= px < ox + ow and oy <= py < oy + oh:
+                for (_a, (nx, ny, nw_, nh_, ncx, ncy), _old) in added:
+                    tx = nx + ncx + (px - (ox + ocx))
+                    ty = ny + ncy + (py - (oy + ocy))
+                    out.append(" ".join(["point"] + head[1:] + [str(tx), str(ty)]))
+        if added:
+            print(f"  + {anim}: allocated {len(added)} new frame rect(s) "
+                  f"(was {len(rects)}, target {target})")
+
     # clone colliders/points for the moved rectangles, anchor-relative
     cloned = []
     for (_i, head, px, py, pw, ph) in colliders:
@@ -214,15 +269,20 @@ def main():
     ns, nc_, np_ = parse(out)
     after = anchor_rel_sets(None, ns, nc_, np_)
     ok = True
-    # 1. per-frame anchor-relative attachment sets must be identical
+    # 1. per-frame anchor-relative attachment sets must be identical; frames
+    # ADDED by this run must clone the first frame's attachment exactly
     for anim in set(list(before) + list(after)):
         b = [(fr, s) for (_i, fr, s) in before.get(anim, [])]
         a = [(fr, s) for (_i, fr, s) in after.get(anim, [])]
-        if len(b) != len(a):
-            print(f"  !! {anim}: frame count changed"); ok = False; continue
-        for k, ((fb, sb), (fa, sa)) in enumerate(zip(b, a)):
-            if sb != sa:
+        if len(a) < len(b):
+            print(f"  !! {anim}: lost frames ({len(b)} -> {len(a)})"); ok = False; continue
+        for k, (fb, sb) in enumerate(b):
+            if a[k][1] != sb:
                 print(f"  !! {anim} frame {k}: attached set changed"); ok = False
+        for k in range(len(b), len(a)):
+            if b and a[k][1] != b[0][1]:
+                print(f"  !! {anim} new frame {k}: attachment differs from "
+                      f"clone source"); ok = False
     # 2. no overlapping distinct sprite rectangles (duplicate lines sharing one
 #    rectangle are intentional - several frames may use the same rect)
     rects = sorted({(a, x, y, w, h) for (_i, a, x, y, w, h, _cx, _cy) in ns})
