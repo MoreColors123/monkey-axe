@@ -62,7 +62,9 @@ Use these names when requesting changes.
 * **Animations** — the animation-chip list (click to edit). Auto-height.
 * **Rectangles** — collapsible bar under Animations; the atlas-slot editor (§6).
 * **Suggestions** — collapsible bar under Rectangles; the agent's proposed
-  mappings with Approve/Dismiss/Reopen and a comment box (§6b).
+  mappings with Approve/Dismiss/Reopen and a comment box (§6b). Open proposals
+  come first, newest on top; a **closed** filter next to the section name hides
+  handled ones (default hidden, remembered per browser).
 * **Animation settings** — name, `Reset section`, `mode`, per-animation `scale`.
 * **Preview** — two animated canvases side by side, original (Ax) and new
   (Guybrush), plus play/replay/fps/loop and a meta line.
@@ -135,6 +137,10 @@ Suggestions bar (under Rectangles) shows each with its proposed frame strip
 (thumbnails + ids, click a thumbnail to select that sprite on the sheet) and the
 animation's current frames beside it.
 
+* The bar lists **open proposals first, newest at the top**; handled
+  (approved/dismissed) ones are hidden unless the **closed** filter next to the
+  section name is ticked (remembered per browser). The agent prepends new
+  proposals to `suggestions.json`, so they land on top.
 * **Approve** — applies the proposal to the *page* mapping (frames + mode +
   scale, undoable). Then **Export mapping.json** + `BuildSprites.bat` as usual;
   exporting does **not** change the suggestion status.

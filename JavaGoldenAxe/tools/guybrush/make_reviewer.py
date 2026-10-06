@@ -232,7 +232,9 @@ TEMPLATE = r"""<!doctype html>
       </div>
     </details>
     <details class="rectbar" id="suggbar" open>
-      <summary>Suggestions <span id="suggcount" class="hint"></span></summary>
+      <summary>Suggestions <span id="suggcount" class="hint"></span><label
+        id="suggclosedwrap" title="Show handled (approved/dismissed) suggestions too"><input
+        id="suggshowclosed" type="checkbox"> closed</label></summary>
       <div id="suggbarwrap">
         <div id="suggbody"></div>
       </div>
@@ -328,6 +330,8 @@ TEMPLATE = r"""<!doctype html>
     <h3>Suggestions</h3>
     <p>Proposed mappings (written to <code>suggestions.json</code> by the agent) appear in the
        <b>Suggestions</b> bar: the proposed frame strip next to the animation's current frames.
+       Open proposals come first, newest at the top; handled (approved/dismissed) ones are
+       hidden unless you tick <b>closed</b> next to the section name (remembered per browser).
        <b>Approve</b> applies the proposal to the page (then <b>Export mapping.json</b> keeps it);
        <b>Dismiss</b> rejects it; <b>Reopen</b> re-opens a handled one. The comment box is saved
        back to <code>suggestions.json</code> for the agent to read - as are the statuses, which
@@ -710,14 +714,27 @@ function renderSuggestions(){
   const el = document.getElementById('suggbody');
   if (!el) return;
   el.innerHTML = '';
+  const showClosed = document.getElementById('suggshowclosed').checked;
+  // open proposals on top, newest first; handled ones below (newest first)
+  const rank = {proposed: 0, approved: 1, dismissed: 2};
+  const shown = suggestions
+    .map((s, i) => ({s, i}))
+    .filter(({s}) => showClosed || (s.status || 'proposed') === 'proposed')
+    .sort((a, b) => (rank[a.s.status || 'proposed'] - rank[b.s.status || 'proposed'])
+                    || (b.i - a.i));
   const open = suggestions.filter(s => (s.status || 'proposed') === 'proposed').length;
-  const cnt = document.getElementById('suggcount');
-  if (cnt) cnt.textContent = suggestions.length + ' total, ' + open + ' open';
+  document.getElementById('suggcount').textContent =
+    shown.length + ' shown, ' + open + ' open of ' + suggestions.length + ' total';
   if (!suggestions.length){
     el.innerHTML = '<div class="hint">No suggestions right now. Proposals are written to suggestions.json and appear here after ReviewSprites.bat regenerates the page.</div>';
     return;
   }
-  for (const s of suggestions){
+  if (!shown.length){
+    el.innerHTML = '<div class="hint">' + open + ' open of ' + suggestions.length
+      + ' - tick "closed" in the header to see handled suggestions.</div>';
+    return;
+  }
+  for (const {s} of shown){
     const status = s.status || 'proposed';
     const card = document.createElement('div');
     card.className = 'sugg ' + status;
@@ -1088,6 +1105,19 @@ document.getElementById('rects').onclick = () => {
 };
 document.getElementById('rectsbar').addEventListener('toggle', renderRects);
 document.getElementById('rectsonlycur').onchange = renderRects;
+// suggestions filter: "closed" shows handled (approved/dismissed) proposals;
+// state is remembered per browser. Must run before the first refresh().
+const suggClosedWrap = document.getElementById('suggclosedwrap');
+suggClosedWrap.addEventListener('click', e => e.stopPropagation());
+try {
+  document.getElementById('suggshowclosed').checked =
+    localStorage.getItem('suggShowClosed') === '1';
+} catch(err) { /* storage unavailable - default to closed hidden */ }
+document.getElementById('suggshowclosed').onchange = e => {
+  try { localStorage.setItem('suggShowClosed', e.target.checked ? '1' : '0'); }
+  catch(err) { /* ignore */ }
+  renderSuggestions();
+};
 document.getElementById('helpbtn').onclick = () => { document.getElementById('helpoverlay').style.display = 'block'; };
 document.getElementById('closehelp').onclick = () => { document.getElementById('helpoverlay').style.display = 'none'; };
 

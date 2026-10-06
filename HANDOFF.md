@@ -274,7 +274,9 @@ frames**, **Frame list**. Controls:
 * **Suggestions** bar: under Rectangles. Each card is one proposed mapping from
   `suggestions.json` — proposed strip (thumbnails, click to select the sprite),
   current strip for comparison, `Approve` (applies to the page mapping; then
-  Export as usual), `Dismiss`/`Reopen`, and a comment box. Statuses and comments
+  Export as usual), `Dismiss`/`Reopen`, and a comment box. Open proposals come
+  first, newest on top; a **closed** filter next to the section name hides
+  handled ones (default hidden, remembered per browser). Statuses and comments
   persist through `serve_reviewer.py` (`POST /api/suggestions`). See
   `REVIEWER.md` §6b.
 * **Preview** (original vs new, playing together) and **Baked frames** show **every
