@@ -34,3 +34,7 @@ JavaGoldenAxe/tools/guybrush/sprites_overview.png
 
 # Windows Explorer "copy" duplicates (e.g. "mapping - Kopie.json")
 * - Kopie.*
+
+# reviewer export backup + temp file (written next to mapping.json)
+JavaGoldenAxe/tools/guybrush/mapping.backup.json
+JavaGoldenAxe/tools/guybrush/mapping.json.tmp

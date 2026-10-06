@@ -1,5 +1,6 @@
 @echo off
-REM Open the visual sprite mapping editor (reviewer.html).
+REM Open the visual sprite mapping editor (reviewer.html) with a local server so
+REM "Export mapping.json" can save in place (backup: mapping.backup.json).
 setlocal
 cd /d "%~dp0JavaGoldenAxe\tools\guybrush"
 
@@ -12,6 +13,6 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Opening the sprite mapper in your browser...
-start "" "%~dp0JavaGoldenAxe\tools\guybrush\reviewer.html"
+echo Starting the sprite mapper server (Ctrl+C here to stop)...
+python serve_reviewer.py
 endlocal
