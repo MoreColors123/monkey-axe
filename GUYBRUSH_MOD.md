@@ -5,7 +5,8 @@ Revenge) as a playable character in this Golden Axe remake.
 
 > Building on / continuing this work? See **[HANDOFF.md](HANDOFF.md)** for the
 > full technical handoff (engine internals, tool pipeline, mapping schema,
-> known issues, verification steps).
+> known issues, verification steps) and **[REVIEWER.md](REVIEWER.md)** for the
+> sprite reviewer itself.
 
 Guybrush now appears:
 
@@ -22,10 +23,10 @@ a PNG spritesheet (`res/image/<character-id>.png`).
 
 Rather than hand-author a brand-new rig, the mod reuses Ax Battler's exact frame
 layout (so all hitboxes, grab points and state names keep working) and *bakes*
-Guybrush art into a new 600x1000 spritesheet. The new character is registered as
-`guybrush_threepwood`, which maps 1:1 onto the existing animation names
-(`idle`, `walking_down`, `walking_up`, `running`, `attack_1..7`,
-`attack_special`, `jumping`, `knock_down`, `dying`, ...).
+Guybrush art into a fresh spritesheet (600x1000, grown if the layout was
+de-shared). The new character is registered as `guybrush_threepwood`, which maps
+1:1 onto the existing animation names (`idle`, `walking_down`, `walking_up`,
+`running`, `attack_1..7`, `attack_special`, `jumping`, `knock_down`, `dying`, ...).
 
 ## Choosing the sprites (the mapper)
 
@@ -35,27 +36,27 @@ or use the visual editor.
 
 ### Visual editor
 
-Double-click **`ReviewSprites.bat`** in the repo root. It builds and opens
-`reviewer.html` (a single self-contained page — no server needed). In the page:
+Double-click **`ReviewSprites.bat`** in the repo root. It regenerates
+`reviewer.html` and starts a tiny local server so the editor can **save
+`mapping.json` in place** (keeping the previous file as `mapping.backup.json`).
+In the page:
 
-* the left side shows the whole source sheet with every detected sprite boxed;
-  click a box to select it, drag to pan, scroll to zoom;
-* the right side lists every Golden Axe animation. Pick one to see a live
-  filmstrip preview and a **play/pause animated preview** that plays at the
-  animation's real speed (the `fps` box defaults to the speed from the `.char`
-  and can be overridden for previewing). One-shot animations hold their last
-  frame like the game does — tick **loop preview** to make them repeat;
-* assign sprites with **+ append selected sprite** / **replace frames with
-  selected**, click a thumbnail to set that frame, and reorder with the arrows;
+* the **Sheet** shows the whole source sheet with every detected sprite boxed;
+  click a box to select it, double-click to append it to the current animation,
+  drag to pan, scroll to zoom;
+* the **Animations** list picks which animation you edit; the **Rectangles** bar
+  below it edits atlas slots directly (`rect_overrides`);
+* **Preview** plays the original (Ax) and new (Guybrush) animations side by side
+  at the real speed, alongside **Baked frames** and the editable **Frame list**;
 * tune **mode** (`bottom` = feet on the ground, `center` = lying) and an optional
-  per-animation **scale**;
-* **Undo** steps back one action; **Reset section** restores just the current
-  animation and **Reset all** restores everything to the last exported/loaded
-  mapping (edited sections are marked with a `*`);
-* click **Preview all animations** for a full overview.
+  per-animation **scale**; the top bar sets the **global scale**;
+* **Undo** / **Redo** (`Ctrl+Z` / `Ctrl+Y`), **Reset section** and **Reset all**
+  (edited sections are marked with a `*`);
+* the **Help** button explains each section and setting.
 
-When you are happy, click **Export mapping.json** and save the downloaded file
-over `JavaGoldenAxe/tools/guybrush/mapping.json`.
+When you are happy, click **Export mapping.json** — it saves straight over
+`JavaGoldenAxe/tools/guybrush/mapping.json`. See [REVIEWER.md](REVIEWER.md) for
+the full editor guide.
 
 ### Bake it in
 
@@ -68,7 +69,9 @@ Double-click **`BuildSprites.bat`** (runs `build_atlas.py`). This repaints
 ```
 detect_sprites.py  ->  sprites.json   every sprite on the sheet, with ids
 init_mapping.py    ->  mapping.json   the default mapping (run once / to reset)
-make_reviewer.py   ->  reviewer.html  the self-contained editor
+make_reviewer.py   ->  reviewer.html  the editor
+serve_reviewer.py  ->  local server   lets the editor save mapping.json in place
+deshare.py         ->  layout         gives every animation its own rectangles
 build_atlas.py     ->  game assets    mapping.json + sprites.json -> spritesheet
 patch_select.py    ->  select screen  swaps the portrait
 ```
@@ -120,6 +123,7 @@ Inkscape's bundled build, already has both).
 ```
 assets/res/image/guybrush_threepwood.png          (new)
 assets/res/chars/guybrush_threepwood.char         (new)
+assets/res/chars/guybrush_layout.char             (new; de-shared layout)
 assets/res/image/hud_magic_guybrush_threepwood.png(new)
 assets/res/chars/hud_magic_guybrush_threepwood.char(new)
 assets/res/image/select_player.png                (Ax portrait -> Guybrush)
@@ -138,8 +142,11 @@ tools/guybrush/detect_sprites.py                  (rebuild sprites.json)
 tools/guybrush/init_mapping.py                    (reset mapping.json)
 tools/guybrush/make_reviewer.py                   (build reviewer.html)
 tools/guybrush/reviewer.html                      (visual mapper)
+tools/guybrush/serve_reviewer.py                  (local server: save in place)
+tools/guybrush/deshare.py                         (de-share the frame layout)
 tools/guybrush/build_atlas.py                     (bake mapping.json -> game assets)
 tools/guybrush/patch_select.py                    (swap the select portrait)
+HANDOFF.md / REVIEWER.md                          (technical docs)
 ```
 
 ## Known limitations
