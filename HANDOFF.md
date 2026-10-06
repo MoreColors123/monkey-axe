@@ -165,6 +165,8 @@ for the HUD portrait.
 guybrush_source.png   raw MI2 sheet (green background)
 sprites.json          every detected sprite: {id,x,y,w,h,row}   (1133 of them)
 mapping.json          THE EDITABLE MAP (see §7)
+suggestions.json      agent-proposed mappings; the reviewer's Suggestions bar
+                      reads them and writes back approve/dismiss + comments
 detect_sprites.py     sheet -> sprites.json   (connected components + small merge)
 init_mapping.py       reset mapping.json to the original hand-picked mapping
 make_reviewer.py      sprites.json + mapping.json + .char -> reviewer.html
@@ -262,6 +264,12 @@ frames**, **Frame list**. Controls:
   select a sheet sprite then `Set` stores `mapping.rect_overrides`. Shared
   rectangles are highlighted and `borrowed` frames are outlined in orange. Since
   `deshare.py` there are no shared rectangles, so it is usually just a read-out.
+* **Suggestions** bar: under Rectangles. Each card is one proposed mapping from
+  `suggestions.json` — proposed strip (thumbnails, click to select the sprite),
+  current strip for comparison, `Approve` (applies to the page mapping; then
+  Export as usual), `Dismiss`/`Reopen`, and a comment box. Statuses and comments
+  persist through `serve_reviewer.py` (`POST /api/suggestions`). See
+  `REVIEWER.md` §6b.
 * **Preview** (original vs new, playing together) and **Baked frames** show **every
   mapped frame**, including frames beyond the game layout — the inherited
   single-frame poses such as `jumping_attack`. Extra frames are drawn in orange and
@@ -485,6 +493,10 @@ item at a time, and tick it off here as it is done.
   "original (Ax)" preview uses `origGa` from `ax_battler.char` so it still works.
 
 ### Phase 2 — Attack fidelity
+- [ ] Review the attack-swing proposals in the reviewer's **Suggestions** bar
+  (`attack_1..7`, `attack_short` — swordfight poses from rows ~y1140-1360;
+  `attack_special` keeps the monkey) — approve/comment there, then Export and
+  bake. The agent verifies headlessly and commits afterwards.
 - [ ] Map coherent swing sequences for `attack_1..7`, `attack_short`,
   `attack_special`, `attack_special_return` (currently a few front "point/punch"
   poses; `attack_special` uses the raised-cutlass sprites).

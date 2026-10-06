@@ -37,8 +37,9 @@ falls back to a browser download.
 | --- | --- |
 | `tools/guybrush/make_reviewer.py` | Generator. Contains the whole page as the `TEMPLATE` string; reads data, writes `reviewer.html`. |
 | `tools/guybrush/reviewer.html` | Generated page. **Do not edit by hand** — edit `make_reviewer.py` and regenerate. |
-| `tools/guybrush/serve_reviewer.py` | Local server + in-place save endpoint. |
+| `tools/guybrush/serve_reviewer.py` | Local server + in-place save endpoints (`/api/save`, `/api/suggestions`). |
 | `tools/guybrush/mapping.json` | The editable map (embedded into the page on generate). |
+| `tools/guybrush/suggestions.json` | The agent's proposed mappings + your approve/dismiss/comment state (§6b). |
 | `tools/guybrush/sprites.json` | Sprite catalog from `detect_sprites.py`. |
 | `assets/res/chars/guybrush_threepwood.char` | Current layout; drives `ga`, `animOrder`, speed/loop. |
 | `assets/res/image/guybrush_source.png` | Source sheet (green keyed out in Python before embedding). |
@@ -46,7 +47,7 @@ falls back to a browser download.
 | `assets/res/chars/ax_battler.char` | Vanilla layout, parsed into `origGa` (original preview). |
 
 Embedded `DATA` object: `sheet`, `origSheet`, `sprites`, `mapping`, `animOrder`,
-`ga` (frames per animation), `origGa`, `speed`, `loop`.
+`ga` (frames per animation), `origGa`, `speed`, `loop`, `suggestions`.
 
 ---
 
@@ -60,6 +61,8 @@ Use these names when requesting changes.
   double-click to append to the current animation, drag to pan, wheel to zoom.
 * **Animations** — the animation-chip list (click to edit). Auto-height.
 * **Rectangles** — collapsible bar under Animations; the atlas-slot editor (§6).
+* **Suggestions** — collapsible bar under Rectangles; the agent's proposed
+  mappings with Approve/Dismiss/Reopen and a comment box (§6b).
 * **Animation settings** — name, `Reset section`, `mode`, per-animation `scale`.
 * **Preview** — two animated canvases side by side, original (Ax) and new
   (Guybrush), plus play/replay/fps/loop and a meta line.
@@ -122,6 +125,30 @@ The first animation that uses it owns it; others' choices are ignored (shown as
 
 After `deshare.py` (see `HANDOFF.md` §5/§6) there are **zero shared rectangles**,
 so each animation owns its own and overrides are rarely needed.
+
+---
+
+## 6b. Suggestions (agent proposals)
+
+The agent writes proposed mappings to `tools/guybrush/suggestions.json`; the
+Suggestions bar (under Rectangles) shows each with its proposed frame strip
+(thumbnails + ids, click a thumbnail to select that sprite on the sheet) and the
+animation's current frames beside it.
+
+* **Approve** — applies the proposal to the *page* mapping (frames + mode +
+  scale, undoable). Then **Export mapping.json** + `BuildSprites.bat` as usual;
+  exporting does **not** change the suggestion status.
+* **Dismiss / Reopen** — marks the proposal rejected / back to open. Statuses
+  and comments persist via `POST /api/suggestions` (atomic write to
+  `suggestions.json`), so they survive a reload when the page runs through
+  `serve_reviewer.py` (i.e. `ReviewSprites.bat`). Without the server the state
+  stays in-memory only.
+* **Comment box** — free text for the agent ("what to change about this
+  proposal"), saved with *Save comment*; drafts are kept while you keep editing
+  the page.
+
+Workflow: agent edits `suggestions.json` → you run `ReviewSprites.bat` (it
+regenerates `reviewer.html` with the new proposals) → approve/comment → Export.
 
 ---
 
