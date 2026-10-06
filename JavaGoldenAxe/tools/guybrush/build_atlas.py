@@ -87,8 +87,16 @@ def main():
             src_cache[key] = key_green(src_sheet.crop((x, y, x + w, y + h)))
         return src_cache[key]
 
-    ax_char = ROOT / "chars" / "ax_battler.char"
-    atlas = Image.new("RGBA", (ATLAS_W, ATLAS_H), (0, 0, 0, 0))
+    # Prefer a de-shared layout (deshare.py) if one exists; otherwise use Ax's.
+    layout_path = ROOT / "chars" / "guybrush_layout.char"
+    if not layout_path.exists():
+        layout_path = ROOT / "chars" / "ax_battler.char"
+    frames = parse_frames(layout_path)
+    # a de-shared layout adds rectangles to the right, so size the canvas to fit
+    max_x = max((x + w for (_a, x, y, w, h, cx, cy) in frames), default=ATLAS_W)
+    max_y = max((y + h for (_a, x, y, w, h, cx, cy) in frames), default=ATLAS_H)
+    atlas = Image.new("RGBA", (max(ATLAS_W, max_x), max(ATLAS_H, max_y)),
+                      (0, 0, 0, 0))
 
     # Group sprite lines by animation, preserving order. Within one animation a
     # rectangle may repeat (the original art holds a pose for several frames);
@@ -96,56 +104,109 @@ def main():
     # (which is keyed by rectangle) collapses the animation into one pose.
     grouped = {}
     order = []
-    for (anim, x, y, w, h, cx, cy) in parse_frames(ax_char):
+    for (anim, x, y, w, h, cx, cy) in frames:
         if anim not in grouped:
             grouped[anim] = []
             order.append(anim)
         grouped[anim].append((x, y, w, h, cx, cy))
 
-    for anim in order:
-        flist = grouped[anim]
-        if anim == "none":
-            continue
-        if anim == "logo":
-            x, y, w, h, cx, cy = flist[0]
-            spr = tile(sprites[face_id]).resize((w, h), Image.NEAREST)
-            place(atlas, spr, x, y)
-            continue
+    # The atlas has ONE slot per rectangle, but the original layout reuses the
+    # same rectangle across several animations (e.g. attack_1/attack_2,
+    # thrown/stunned_2/stand_up). A rectangle must therefore resolve to exactly
+    # one sprite + size + mode. The first animation (in layout order) that uses
+    # a rectangle owns it; later animations reuse its choice. This is what stops
+    # two poses being alpha-composited into the same slot (the "doubled sprite"
+    # bug). A rectangle can be forced with mapping["rect_overrides"].
+    plan = {}
 
+    def plan_animation(anim):
+        flist = grouped[anim]
         entry = animations.get(anim) or animations["idle"]
         ids = entry.get("frames") or animations["idle"]["frames"]
         mode = entry.get("mode", "bottom")
         base = entry.get("scale", global_scale)
 
-        # assign one source per distinct rectangle, in order of first appearance
-        assign = {}
-        di = 0
+        distinct = []
+        seen = set()
         for (x, y, w, h, cx, cy) in flist:
             key = (x, y, w, h)
-            if key not in assign:
-                assign[key] = ids[di % len(ids)]
-                di += 1
-            sprite = sprites[assign[key]]
-            spr = tile(sprite)
-            s = fit_scale(spr.width, spr.height, w, h, cx, cy, mode, base)
-            nw, nh = max(1, round(spr.width * s)), max(1, round(spr.height * s))
-            scaled = spr.resize((nw, nh), Image.NEAREST)
+            if key not in seen:
+                seen.add(key)
+                distinct.append((x, y, w, h, cx, cy))
+        if not distinct:
+            return
 
+        # One scale for the whole "bottom" animation. A frame's anchor (cy) can
+        # differ from its neighbours (e.g. stunned_1 stands tall then crouches),
+        # and fitting every frame to its own anchor made one pose pop out larger.
+        # Fitting the whole animation to the smallest anchor keeps the character
+        # a constant size. "center" (lying) poses still fit their own box.
+        uniform = None
+        if mode != "center":
+            uniform = min(
+                fit_scale(sprites[ids[i % len(ids)]]["w"],
+                          sprites[ids[i % len(ids)]]["h"],
+                          w, h, cx, cy, mode, base)
+                for i, (x, y, w, h, cx, cy) in enumerate(distinct))
+
+        for i, (x, y, w, h, cx, cy) in enumerate(distinct):
+            key = (x, y, w, h)
+            if key in plan:
+                continue
+            sp_id = ids[i % len(ids)]
             if mode == "center":
-                px, py = x + cx - nw // 2, y + (h - nh) // 2
+                sc = fit_scale(sprites[sp_id]["w"], sprites[sp_id]["h"],
+                               w, h, cx, cy, mode, base)
             else:
-                px, py = x + cx - nw // 2, y + cy - nh
+                sc = uniform
+            plan[key] = {"rect": (x, y, w, h, cx, cy), "id": sp_id,
+                         "mode": mode, "scale": sc, "owner": anim}
 
-            layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-            layer.paste(scaled, (px - x, py - y), scaled)
-            place(atlas, layer, x, y)
+    for anim in order:
+        if anim not in ("none", "logo"):
+            plan_animation(anim)
+
+    # optional per-rectangle override, e.g. {"176,296,39,55": "s0050"} or
+    # {"176,296,39,55": {"id": "s0050", "scale": 1.0}}
+    for key_str, ov in (mapping.get("rect_overrides") or {}).items():
+        key = tuple(int(t) for t in key_str.split(","))
+        p = plan.get(key)
+        if not p:
+            continue
+        if isinstance(ov, str):
+            p["id"] = ov
+        elif isinstance(ov, dict):
+            for field in ("id", "mode", "scale"):
+                if field in ov:
+                    p[field] = ov[field]
+
+    if "logo" in grouped:
+        x, y, w, h, cx, cy = grouped["logo"][0]
+        spr = tile(sprites[face_id]).resize((w, h), Image.NEAREST)
+        place(atlas, spr, x, y)
+
+    for p in plan.values():
+        x, y, w, h, cx, cy = p["rect"]
+        spr = tile(sprites[p["id"]])
+        s = p["scale"]
+        nw, nh = max(1, round(spr.width * s)), max(1, round(spr.height * s))
+        scaled = spr.resize((nw, nh), Image.NEAREST)
+        if p["mode"] == "center":
+            px, py = x + cx - nw // 2, y + (h - nh) // 2
+        else:
+            px, py = x + cx - nw // 2, y + cy - nh
+        layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        layer.paste(scaled, (px - x, py - y), scaled)
+        # replace the whole rectangle (no alpha mask) so nothing can ghost
+        atlas.paste((0, 0, 0, 0), (x, y, x + w, y + h))
+        atlas.paste(layer, (x, y))
 
     out_png = ROOT / "image" / f"{CHAR_ID}.png"
     atlas.save(out_png)
     print("wrote", out_png, atlas.size)
 
     out_char = ROOT / "chars" / f"{CHAR_ID}.char"
-    content = (ROOT / "chars" / "ax_battler.char").read_text(encoding="latin-1")
+    content = layout_path.read_text(encoding="latin-1")
     content = content.replace("# --- ax battler ---",
                               "# --- guybrush threepwood (reskin of ax battler) ---", 1)
     out_char.write_text(content, encoding="latin-1")
