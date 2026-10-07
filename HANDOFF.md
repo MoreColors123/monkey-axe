@@ -94,6 +94,8 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   `attack_1..7`, `attack_special`, `attack_special_return`, `attack_short`,
   `grab_and_throw`, `thrown`, `stunned_1/2`, `knock_down`, `stand_up`,
   `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
+  **Guybrush deliberately provides no `mounting`/`mounted_*`, so he cannot
+  mount beasts (see §10); the beasts themselves are unchanged.**
   `walking_side` = NEW (mod): profile side-walk for horizontal movement, added
    by an approved engine patch in `Actor.Walking` (plays it when the character
    provides it, else the original walking_down/up behaviour). 8 frames drawn
@@ -362,8 +364,15 @@ A red error banner appears at the top if the page throws.
   that a sharing animation may show the owner's pose. Use `rect_overrides` in
   `mapping.json` to force a rectangle's sprite/size/mode. The reviewer lists any
   frames that come from shared rectangles owned by another animation.
-* All `mounted_*` states reuse walking frames as stand-ins (no mounted art
-  exists).
+* **Player mounting is removed on purpose.** The MI2 sheet has no riding pose
+  and the stand-in looked wrong (Guybrush strutting in place on the beast), so
+  `mounting`/`mounted_*` are dropped from Guybrush entirely — he cannot mount.
+  The beasts (`chicken_leg`, `dragon_blue/red`) still spawn, still carry enemy
+  riders and still work; scripted `MOUNT` commands only target enemies. The
+  engine only offers the mount interaction when the character has a `mounting`
+  animation (`Actor` ~line 1157) and only adds the `Mounting`/`Mounted` states
+  under the same check, so there is no dangling state. Restoring it needs a
+  seated pose set (see the ideas below).
 * `magic` uses the horn-blow poses (s1142/s1145); the magic *effect* is still
   unchanged (Ax's volcano).
 
@@ -482,6 +491,9 @@ replay/save-state system (the engine has no serialization) or an auto-tour demo
   still used, so the game can boot the old behaviour. Delete
   `JavaGoldenAxe\build-custom` (or run `.\run.ps1 -Rebuild`) whenever you change
   Java sources outside a normal edit-and-run.
+* `mounting`/`mounted_*` are intentionally absent from Guybrush (player mount
+  descope, §10). Re-running `deshare.py` regenerates `guybrush_layout.char`
+  from `ax_battler.char` and would re-add them — re-remove afterwards.
 
 ---
 
@@ -588,8 +600,8 @@ item at a time, and tick it off here as it is done.
   small animal-figure sprites — worth a re-check in the reviewer.
 
 ### Phase 4 — Mounted & magic
-- [x] `mounting` / `mounted_*`: no mounted art exists; walking frames are used
-  as stand-ins.
+- [x] `mounting` / `mounted_*`: **removed** — no riding art on the sheet, so
+  Guybrush can no longer mount; the beasts are unaffected (see §10).
 - [ ] `magic` *effect*: pose is done (horn-blow s1142/s1145); decide whether to
   replace Ax's volcano effect (`magic_fire_*.ani`).
 

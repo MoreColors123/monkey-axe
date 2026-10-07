@@ -122,7 +122,7 @@ Inkscape's bundled build, already has both).
 | `magic` | horn-blow poses (`s1142`/`s1145`) |
 | `grab_and_throw` | grab / throw poses |
 | `stunned_1/2`, `stand_up` | stunned / getting-up poses |
-| `mounting`, `mounted_*` | walking frames as stand-ins |
+| `mounting`, `mounted_*` | removed — Guybrush can't mount (see below) |
 | `knock_down`, `thrown`, `resting`, `dying`, `dead` | lying on ground |
 
 ## Files changed
@@ -166,6 +166,10 @@ HANDOFF.md / REVIEWER.md                          (technical docs)
   inside the existing frame rectangles without clipping.
 * Colliders/points are inherited unchanged from Ax Battler, so reach and grab
   points are approximately where the original character had them.
+* **Mounting is disabled.** The sheet has no pose of Guybrush riding a beast, so
+  he cannot mount the chicken-legs/dragons. The animals still appear and still
+  carry enemy riders, exactly as in the original — only the player's ability to
+  ride them is removed.
 * Several special poses are single-frame in the original remake and therefore
   here too — `running_attack`, `jumping_attack`, `jumping_death_stab`,
   `stand_up`, `mounting`/`mounted_*`, `resting`, `dead`. They are held for a
