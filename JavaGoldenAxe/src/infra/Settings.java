@@ -99,6 +99,9 @@ public class Settings {
     public static int KEY_PLAYER_2_ATTACK = KeyEvent.VK_G;
     public static int KEY_PLAYER_2_JUMP = KeyEvent.VK_H;
     
+    // TEST/debug: toggle "every enemy dies 3s after spawning" (see Stage).
+    public static int KEY_TEST_AUTO_KILL_ENEMIES = KeyEvent.VK_Y;
+    
     // --- life ---
     
     public static int CREDITS = 20;

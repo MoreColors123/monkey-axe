@@ -50,6 +50,9 @@ public class GoldenAxeGame {
     // (no OL Presents / disclaimer / winners screens, no title, no select
     // screen, no intro). Set to false to restore the normal flow.
     public static boolean TEST_BOOT_TO_GAME = true;
+    // TEST: when true, every enemy dies 3s after it enters the stage, so you can
+    // traverse the whole level quickly. Toggle in-game with Y (see Stage).
+    public static boolean TEST_AUTO_KILL_ENEMIES = false;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;

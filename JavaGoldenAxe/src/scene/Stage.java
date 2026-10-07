@@ -1,6 +1,7 @@
 package scene;
 
 import actor.Decoration;
+import actor.Enemy;
 import actor.Player;
 import static actor.Player.PlayerCharacter.GILIUS;
 import infra.Actor;
@@ -48,6 +49,9 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
     public static final int MAX_BACKGROUND_LAYERS = 4;
     public static final int MAGIC_LAYER = 2;
     
+    // TEST/debug: delay before the Y auto-kill toggle kills a spawned enemy.
+    private static final long TEST_ENEMY_KILL_DELAY_MS = 3000;
+    
     // 0~1=background 2=magic 3=top_layer
     private final BackgroundTransition[] backgrounds 
                             = new BackgroundTransition[MAX_BACKGROUND_LAYERS];
@@ -94,6 +98,7 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
     }
 
     public void addActor(Actor actor) {
+        actor.spawnTime = Util.getTime();
         addActors.add(actor);
     }
 
@@ -253,6 +258,27 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
             actors.removeAll(removeActors);
             removeActors.forEach(actor -> actorsById.remove(actor.getId()));
             removeActors.clear();
+        }
+        // TEST: press Y to make every enemy die 3s after it spawns (clears the
+        // waves so you can traverse the whole level). Press Y again to stop.
+        if (Input.isKeyJustPressed(KEY_TEST_AUTO_KILL_ENEMIES)) {
+            GoldenAxeGame.TEST_AUTO_KILL_ENEMIES =
+                    !GoldenAxeGame.TEST_AUTO_KILL_ENEMIES;
+            System.out.println("[test] auto-kill enemies = "
+                    + GoldenAxeGame.TEST_AUTO_KILL_ENEMIES);
+        }
+        if (GoldenAxeGame.TEST_AUTO_KILL_ENEMIES) {
+            long now = Util.getTime();
+            for (Actor actor : actors) {
+                if (actor instanceof Enemy enemy && enemy.isAlive()
+                        && now - enemy.spawnTime >= TEST_ENEMY_KILL_DELAY_MS) {
+                    String stateName = enemy.getStateManager()
+                            .getCurrentState().getName();
+                    if (!stateName.equals("dying") && !stateName.equals("dead")) {
+                        enemy.forceKill();
+                    }
+                }
+            }
         }
         Camera.update();
         checkCollisions();

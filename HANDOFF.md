@@ -50,6 +50,11 @@ Testing toggles (in `src/infra/GoldenAxeGame.java`):
 * `DEBUG_STATE_SWITCH` — prints state/animation switches to the console
   (`[state]` deduplicated to real changes; `[anim]` on animation change).
   Temporary diagnosis aid; remove once done.
+* **`Y` (in-game)** toggles the enemy auto-kill cheat: every enemy dies 3s
+  after it spawns (`TEST_AUTO_KILL_ENEMIES` in `GoldenAxeGame`, off by default;
+  `Stage` reads `Actor.spawnTime` and calls `Actor.forceKill()`). Use it to walk
+  the whole level without fighting each wave. `KEY_TEST_AUTO_KILL_ENEMIES` in
+  `Settings`.
 * Stage 1's walk-in + opening dialogue are skipped in
   `assets/res/stage/stage_1.inf` (players spawn in `walking` at the arena; the
   original lines are commented right there — swap to restore).

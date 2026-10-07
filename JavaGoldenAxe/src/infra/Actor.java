@@ -130,6 +130,10 @@ public class Actor extends Entity implements Comparable<Actor> {
     protected boolean boss;
     protected int deathCount;
     
+    // TEST/debug: time (ms) this actor entered the stage (set by Stage.addActor);
+    // used by the Y "kill enemies 3s after spawn" toggle in Stage.
+    public long spawnTime = Util.getTime();
+    
     public Actor(Stage stage, String id, int wx, int wz, String characterId
                             , String subtype, PlayerCharacter playerCharacter) {
         
@@ -264,6 +268,24 @@ public class Actor extends Entity implements Comparable<Actor> {
         energy -= damage;
         if (energy < 0) {
             energy = 0;
+        }
+    }
+
+    // TEST/debug: kill this actor immediately (0 energy -> dying). Detaches from
+    // any mount first so a ridden beast is not left player-controlled.
+    public void forceKill() {
+        if (mountedActor != null) {
+            mountedActor.mountingActor = null;
+            mountedActor.control = Control.NONE;
+            mountedActor.setControlEnabled(false);
+            mountedActor = null;
+        }
+        energy = 0;
+        if (stateManager.isStateAvailable("dying")) {
+            stateManager.switchTo("dying");
+        }
+        else {
+            alive = false;
         }
     }
 
