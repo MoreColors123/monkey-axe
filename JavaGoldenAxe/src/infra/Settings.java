@@ -101,6 +101,8 @@ public class Settings {
     
     // TEST/debug: toggle "every enemy dies 3s after spawning" (see Stage).
     public static int KEY_TEST_AUTO_KILL_ENEMIES = KeyEvent.VK_Y;
+    // TEST/debug: toggle whether the player can mount beasts (see Stage).
+    public static int KEY_TEST_PLAYER_CAN_MOUNT = KeyEvent.VK_X;
     
     // --- life ---
     

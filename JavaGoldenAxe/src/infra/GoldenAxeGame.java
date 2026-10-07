@@ -53,6 +53,10 @@ public class GoldenAxeGame {
     // TEST: when true, every enemy dies 3s after it enters the stage, so you can
     // traverse the whole level quickly. Toggle in-game with Y (see Stage).
     public static boolean TEST_AUTO_KILL_ENEMIES = false;
+    // TEST: when true, the player can mount beasts. The mount art is a stand-in
+    // (walking frames), so this exists to test the mount mechanic. Toggle
+    // in-game with X (see Stage); false = player cannot mount.
+    public static boolean TEST_PLAYER_CAN_MOUNT = true;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;

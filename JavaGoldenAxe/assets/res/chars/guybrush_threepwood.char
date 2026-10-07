@@ -166,8 +166,27 @@ sprite knock_down RIGHT 1559 324 89 23 44 16
 
 sprite stand_up RIGHT 1799 345 45 40 22 37
 
-# mounting / mounted_* intentionally removed: the MI2 sheet has no riding poses,
-# so Guybrush cannot mount beasts (player-side descope; see HANDOFF.md §10).
+sprite mounting RIGHT 1559 1605 30 58 15 55
+sprite mounting RIGHT 2039 1922 32 59 16 56
+sprite mounting RIGHT 2039 2091 34 59 17 56
+sprite mounted_side RIGHT 1559 841 30 80 15 55
+sprite mounted_side RIGHT 2039 1540 32 81 16 56
+sprite mounted_side RIGHT 2039 1731 34 81 17 56
+sprite mounted_side_flip RIGHT 1559 1031 30 80 15 55
+sprite mounted_side_flip RIGHT 2039 1158 32 81 16 56
+sprite mounted_side_flip RIGHT 2039 1349 34 81 17 56
+sprite mounted_down RIGHT 1559 457 30 82 15 55
+sprite mounted_down RIGHT 2039 772 32 83 16 56
+sprite mounted_down RIGHT 2039 965 34 83 17 56
+sprite mounted_down_flip RIGHT 1559 649 30 82 15 55
+sprite mounted_down_flip RIGHT 2039 386 32 83 16 56
+sprite mounted_down_flip RIGHT 2039 579 34 83 17 56
+sprite mounted_up RIGHT 1559 1221 32 82 15 55
+sprite mounted_up RIGHT 2039 0 33 83 16 56
+sprite mounted_up RIGHT 2039 193 34 83 17 56
+sprite mounted_up_flip RIGHT 1559 1413 32 82 15 55
+sprite mounted_up_flip RIGHT 1799 1880 33 83 16 56
+sprite mounted_up_flip RIGHT 1799 2073 34 83 17 56
 
 parameter resting wakeup_delay_time 2000
 sprite resting RIGHT 1022 254 90 30 45 28

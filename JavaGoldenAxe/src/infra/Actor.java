@@ -1175,8 +1175,14 @@ public class Actor extends Entity implements Comparable<Actor> {
             case MOUNT:
                 String currentStateName = 
                                 stateManager.getCurrentState().getName();
+                // TEST: allow toggling the player's ability to mount (X).
+                boolean playerRider = control == Control.PLAYER_1 
+                                        || control == Control.PLAYER_2;
+                boolean canMount = !playerRider 
+                                        || GoldenAxeGame.TEST_PLAYER_CAN_MOUNT;
                 
-                if (stateManager.isStateAvailable("mounting") 
+                if (canMount
+                    && stateManager.isStateAvailable("mounting") 
                     && (currentStateName.equals("walking")
                         || currentStateName.equals("walk_to"))
                             && sourceActor.mountingActor == null) {

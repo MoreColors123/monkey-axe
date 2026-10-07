@@ -194,6 +194,62 @@
     "s0263"
    ]
   },
+  "mounting": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_side": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_side_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_down": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_down_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_up": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
+  "mounted_up_flip": {
+   "mode": "bottom",
+   "frames": [
+    "s0004",
+    "s0008",
+    "s0006"
+   ]
+  },
   "resting": {
    "mode": "center",
    "frames": [

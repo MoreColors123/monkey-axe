@@ -41,6 +41,10 @@ Launchers (double-click, all in the repo root):
 * `BuildSprites.bat` — bakes `mapping.json` into the game sprites.
 * `run.ps1` — the engine behind the bats; `.\run.ps1 -Rebuild` forces recompile.
 
+> **Never launch the game yourself.** `GoldenAxe.bat`/`run.ps1` open a GUI window
+> on the user's desktop. Ask the user to start the game and to test; do not run
+> it as an agent step. (Same for `ReviewSprites.bat` — don't drive the browser.)
+
 Testing toggles (in `src/infra/GoldenAxeGame.java`):
 * `TEST_BOOT_TO_GAME = true` — boots straight into Stage 1 as Guybrush in the
   arena (skips OL Presents / disclaimer / winners / title / select / intro);
@@ -55,6 +59,9 @@ Testing toggles (in `src/infra/GoldenAxeGame.java`):
   `Stage` reads `Actor.spawnTime` and calls `Actor.forceKill()`). Use it to walk
   the whole level without fighting each wave. `KEY_TEST_AUTO_KILL_ENEMIES` in
   `Settings`.
+* **`X` (in-game)** toggles whether the player can mount beasts
+  (`TEST_PLAYER_CAN_MOUNT`, default **on** for mount testing; see §10). Off = the
+  player cannot mount. `KEY_TEST_PLAYER_CAN_MOUNT` in `Settings`.
 * Stage 1's walk-in + opening dialogue are skipped in
   `assets/res/stage/stage_1.inf` (players spawn in `walking` at the arena; the
   original lines are commented right there — swap to restore).
@@ -99,8 +106,9 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   `attack_1..7`, `attack_special`, `attack_special_return`, `attack_short`,
   `grab_and_throw`, `thrown`, `stunned_1/2`, `knock_down`, `stand_up`,
   `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
-  **Guybrush deliberately provides no `mounting`/`mounted_*`, so he cannot
-  mount beasts (see §10); the beasts themselves are unchanged.**
+  The `mounting`/`mounted_*` art is a stand-in (walking frames); the player's
+  ability to mount is gated by the **X** test toggle (see §10). When off,
+  Guybrush cannot mount but the beasts are otherwise unchanged.
   `walking_side` = NEW (mod): profile side-walk for horizontal movement, added
    by an approved engine patch in `Actor.Walking` (plays it when the character
    provides it, else the original walking_down/up behaviour). 8 frames drawn
@@ -369,15 +377,15 @@ A red error banner appears at the top if the page throws.
   that a sharing animation may show the owner's pose. Use `rect_overrides` in
   `mapping.json` to force a rectangle's sprite/size/mode. The reviewer lists any
   frames that come from shared rectangles owned by another animation.
-* **Player mounting is removed on purpose.** The MI2 sheet has no riding pose
-  and the stand-in looked wrong (Guybrush strutting in place on the beast), so
-  `mounting`/`mounted_*` are dropped from Guybrush entirely — he cannot mount.
-  The beasts (`chicken_leg`, `dragon_blue/red`) still spawn, still carry enemy
-  riders and still work; scripted `MOUNT` commands only target enemies. The
-  engine only offers the mount interaction when the character has a `mounting`
-  animation (`Actor` ~line 1157) and only adds the `Mounting`/`Mounted` states
-  under the same check, so there is no dangling state. Restoring it needs a
-  seated pose set (see the ideas below).
+* **Player mounting is a test toggle.** The MI2 sheet has no riding pose, so
+  `mounting`/`mounted_*` use walking-frame stand-ins (which is why it looked
+  wrong). It is restored and enabled by default so the mount mechanic can be
+  tested, and gated by `TEST_PLAYER_CAN_MOUNT`, toggled in-game with **X**
+  (`Actor.react` MOUNT case checks the flag for player-controlled riders; state
+  availability still requires the `mounting` animation). The beasts
+  (`chicken_leg`, `dragon_blue/red`) spawn, carry enemy riders and work as
+  normal; scripted `MOUNT` commands only target enemies. A proper seated pose
+  set would make this real (see the ideas below).
 * `magic` uses the horn-blow poses (s1142/s1145); the magic *effect* is still
   unchanged (Ax's volcano).
 
@@ -496,9 +504,8 @@ replay/save-state system (the engine has no serialization) or an auto-tour demo
   still used, so the game can boot the old behaviour. Delete
   `JavaGoldenAxe\build-custom` (or run `.\run.ps1 -Rebuild`) whenever you change
   Java sources outside a normal edit-and-run.
-* `mounting`/`mounted_*` are intentionally absent from Guybrush (player mount
-  descope, §10). Re-running `deshare.py` regenerates `guybrush_layout.char`
-  from `ax_battler.char` and would re-add them — re-remove afterwards.
+* The mount art is a stand-in (walking frames) and the player mount is gated by
+  the **X** test toggle (see §10) — not a finished riding pose.
 
 ---
 
@@ -605,8 +612,9 @@ item at a time, and tick it off here as it is done.
   small animal-figure sprites — worth a re-check in the reviewer.
 
 ### Phase 4 — Mounted & magic
-- [x] `mounting` / `mounted_*`: **removed** — no riding art on the sheet, so
-  Guybrush can no longer mount; the beasts are unaffected (see §10).
+- [~] `mounting` / `mounted_*`: restored with stand-in (walking) art and gated
+  by the **X** test toggle to exercise the mount mechanic; still needs a real
+  seated pose set (see §10).
 - [ ] `magic` *effect*: pose is done (horn-blow s1142/s1145); decide whether to
   replace Ax's volcano effect (`magic_fire_*.ani`).
 

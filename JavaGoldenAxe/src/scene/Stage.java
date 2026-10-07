@@ -267,6 +267,13 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
             System.out.println("[test] auto-kill enemies = "
                     + GoldenAxeGame.TEST_AUTO_KILL_ENEMIES);
         }
+        // TEST: press X to toggle whether the player can mount beasts.
+        if (Input.isKeyJustPressed(KEY_TEST_PLAYER_CAN_MOUNT)) {
+            GoldenAxeGame.TEST_PLAYER_CAN_MOUNT =
+                    !GoldenAxeGame.TEST_PLAYER_CAN_MOUNT;
+            System.out.println("[test] player can mount = "
+                    + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT);
+        }
         if (GoldenAxeGame.TEST_AUTO_KILL_ENEMIES) {
             long now = Util.getTime();
             for (Actor actor : actors) {
