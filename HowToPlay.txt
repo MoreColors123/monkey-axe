@@ -1,0 +1,43 @@
+Golden Axe — Guybrush Threepwood mod
+=====================================
+
+HOW TO PLAY (Windows)
+---------------------
+1. Install Java 17 (a free runtime, one time):
+     https://adoptium.net/temurin/releases/?version=17
+   Pick  Operating System: Windows  ·  Architecture: x64  ·  Package Type: JRE
+   and run the .msi installer (the default options are fine).
+
+2. Double-click  Play.bat  in this folder.
+
+That's the whole install — the game and all of its art, music and sound are
+inside GoldenAxe.jar. Nothing else to download or build.
+
+If Java isn't found, Play.bat opens the download page for you and waits.
+
+Other operating systems:   java -jar GoldenAxe.jar
+
+
+CONTROLS
+--------
+  Arrows  move      O  attack      P  jump      I  magic
+  F12  fullscreen   F11  toggle aspect ratio
+  2P:  W A S D move      G  attack      H  jump      F  magic
+
+
+CHEATS (hidden)
+---------------
+Type the word  ape  anywhere in-game to open the cheat menu
+(UP/DOWN to move, ENTER to toggle/activate, ESC to close):
+
+  STAGE SELECT        jump to any stage (type 1-9, ENTER)
+  MOUNT BEAST         spawn a mountable beast beside you
+  AUTO-KILL ENEMIES   NO THIEVES   INVINCIBLE PLAYER
+
+
+CREDITS
+-------
+Original Golden Axe remake by Leonardo Ono — github.com/leonardo-ono/JavaGoldenAxe
+Based on the Java clone by derek-keeler — github.com/derek-keeler/GoldenAxeClone
+Guybrush Threepwood sprites ripped from Monkey Island 2 by Ultimecia
+(spriters-resource) — please keep the credit.
