@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Enlarge attack frame rectangles so the cutlass cycle bakes at full scale.
 
+ONE-SHOT / ARCHIVE - already applied to `guybrush_layout.char`; not part of the
+normal pipeline (see HANDOFF.md \u00a76). Nothing references it. Run it again only
+if the attacked frames are re-detected into too-small rectangles.
+
 The baker clamps a bottom-mode animation's scale to `cy / sprite_h` per frame
 (build_atlas.fit_scale) and pastes the sprite bottom-centre on the anchor
 `(cx, cy)`, clipping at the rectangle edges. The unified attack cycle uses

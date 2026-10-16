@@ -123,8 +123,8 @@ patch_select.py    ->  select screen  swaps the portrait
 than source frames, the list is looped. Animations missing from the file fall
 back to `idle`.
 
-Requires Python 3 with Pillow and numpy (on this machine the `python` on PATH,
-Inkscape's bundled build, already has both).
+Requires Python 3 with Pillow and numpy (`python -m pip install pillow numpy`).
+Without them the launcher stops at `import PIL`.
 
 ### Source art
 

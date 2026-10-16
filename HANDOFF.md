@@ -95,12 +95,12 @@ the select screen, in-stage, in the HUD, and in the ending cutscene.
 
 | Thing | Value |
 | --- | --- |
-| Repo root | `C:\opencode\goldenaxeswitch\GoldenAxeClone` |
+| Repo root | wherever the clone lives (e.g. `D:\hermes\monkey-axe`) — never hardcode it |
 | Branch | `guybrush-mod` |
-| Java | Temurin **17** (`javac`/`java` on PATH) |
+| Java | Temurin **17** (`javac`/`java` on PATH; installed here via `scoop install temurin17-jdk`) |
 | Ant | **not installed** — do not rely on `ant`; use `run.ps1` |
-| Python | `C:\Program Files\Inkscape\bin\python.exe` (first on PATH) with **Pillow + numpy** |
-| Workspace scratch | `C:\opencode\goldenaxeswitch\work` (NOT part of the repo) |
+| Python | any Python 3 with **Pillow + numpy** (`python -m pip install pillow numpy`); verified with Python 3.14 / Pillow 12.3 / numpy 2.5.4. If the launchers fail on `import PIL`, the deps are simply not installed |
+| Workspace scratch | outside the repo (e.g. the agent's own scratch dir) — not part of the repo, not tracked |
 
 Launchers (double-click; `Play.bat` lives in the repo root, the rest in `scripts/`):
 
@@ -314,6 +314,9 @@ make_reviewer.py      sprites.json + mapping.json + .char -> reviewer.html
 make_viewer.py        baked .char + .png -> viewer.html (playable move sandbox)
 build_atlas.py        mapping.json + sprites.json -> game assets
 deshare.py            layout -> de-shared guybrush_layout.char (+ --check / --revert)
+fit_attack_scale.py   ONE-SHOT (already applied): enlarges the attack rectangles in
+                      guybrush_layout.char so the cutlass cycle bakes at full scale.
+                      Nothing references it - archive tool, not a pipeline step.
 make_mount_editor.py  beasts + rider layout + mapping -> mount_editor.html
 serve_mount.py        local server for both review pages; saves placements/mapping
 apply_mount.py        mount_placements.json -> mapping.json + layout rectangles
@@ -332,6 +335,10 @@ python init_mapping.py          # only to reset the mapping
 python make_reviewer.py         # after editing mapping.json, refresh the editor
 python deshare.py               # OPTIONAL: give every animation its own rectangles
 python build_atlas.py           # bake mapping.json into the game assets
+#   NOTE: a re-bake re-encodes guybrush_threepwood.png. Verified against the
+#   committed file: identical pixels (0 differing, max channel delta 0), just a
+#   smaller PNG - so `git status` shows the .png as modified while the game looks
+#   exactly the same. Compare with PIL before assuming a real change.
 python patch_select.py          # re-skin the select portrait
 ```
 
@@ -647,13 +654,13 @@ a 3-part harness behind a single `TEST_MODE` flag (default off, revertible):
 1. **Compile + run:** `.\scripts\run.ps1` (or `scripts\GoldenAxe.bat`). Needs a display — the user
    runs this, not you.
 2. **Headless asset check** (no display): build a classpath dir and use the
-   scratch harnesses in `C:\opencode\goldenaxeswitch\work`:
+   scratch harnesses in a work dir of your own, e.g.:
    ```powershell
-   $out='C:\opencode\goldenaxeswitch\work\out'
+   $out='C:\scratch\ga\out'        # any dir OUTSIDE the repo
    # compile once:  javac -d $out (all src\**\*.java)
    Copy-Item -Recurse -Force JavaGoldenAxe\assets\res "$out\res"
-   javac -cp $out -d $out C:\...\work\AttackRender.java
-   java -cp $out AttackRender C:\...\work\out.png idle walking_down walking_up
+   javac -cp $out -d $out C:\scratch\ga\AttackRender.java
+   java -cp $out AttackRender C:\scratch\ga\out.png idle walking_down walking_up
    ```
    `AttackRender` takes the output PNG then any number of animation names.
 3. **Mount placement preview** (`work/CompositeRender.java`): draws the real beast
