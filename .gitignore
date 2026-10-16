@@ -12,12 +12,12 @@
 
 # Package Files #
 *.jar
-# ...but the shipped game jar is committed on purpose (double-click Play.bat)
-!monkeyaxe.jar
+# ...the shipped game is committed as monkeyaxe.zip instead (unzip -> Play.bat):
 *.war
 *.nar
 *.ear
 *.zip
+!monkeyaxe.zip
 *.tar.gz
 *.rar
 

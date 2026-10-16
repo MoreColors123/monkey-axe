@@ -1,6 +1,7 @@
-# Build the shippable monkeyaxe.jar (game classes + assets) into the repo root,
-# plus monkeyaxe.zip - the single-download release artifact bundling the jar,
-# Play.bat and HowToPlay.txt. Needs only a Java 17 runtime on the target machine.
+# Build the shippable game: monkeyaxe.zip in the repo root, holding monkeyaxe.jar
+# plus Play.bat and HowToPlay.txt (all at the zip root). The jar itself is only an
+# intermediate and is git-ignored - the zip is what gets committed and published.
+# The result needs only a Java 17 runtime on the target machine.
 param()
 $ErrorActionPreference = 'Stop'
 
@@ -11,6 +12,7 @@ $src    = Join-Path $proj 'src'
 $assets = Join-Path $proj 'assets\res'
 $work   = Join-Path $root 'build-release'
 $jar    = Join-Path $root 'monkeyaxe.jar'
+$play   = Join-Path $root 'scripts\Play.bat'
 $zip    = Join-Path $root 'monkeyaxe.zip'
 
 Write-Host "Compiling Java sources..."
@@ -29,15 +31,19 @@ if (Test-Path $jar) { Remove-Item -Force $jar }
 if ($LASTEXITCODE -ne 0) { throw "jar failed with exit code $LASTEXITCODE" }
 Remove-Item -Recurse -Force $work
 
-Write-Host "Packaging $zip (jar + Play.bat + HowToPlay.txt) ..."
+Write-Host "Packaging $zip (jar + Play.bat + HowToPlay.txt, all at the zip root) ..."
 if (Test-Path $zip) { Remove-Item -Force $zip }
-Compress-Archive -Path @($jar, (Join-Path $root 'Play.bat'), (Join-Path $root 'HowToPlay.txt')) `
-                 -DestinationPath $zip -CompressionLevel Optimal
+$stage = Join-Path $root 'build-release-zip'
+if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
+New-Item -ItemType Directory -Force -Path $stage | Out-Null
+Copy-Item $jar $stage
+Copy-Item $play $stage
+Copy-Item (Join-Path $root 'HowToPlay.txt') $stage
+Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
+Remove-Item -Recurse -Force $stage
 if (-not (Test-Path $zip)) { throw "Compress-Archive did not produce $zip" }
 
 Write-Host ""
-Write-Host "Done. Rebuilt in the repo root:"
-Write-Host "  monkeyaxe.jar  - play it with Play.bat (or: java -jar monkeyaxe.jar)"
-Write-Host "  monkeyaxe.zip  - single-download release asset (jar + Play.bat + HowToPlay.txt)"
-Write-Host "Commit the jar; the zip is a release artifact and stays untracked."
-Write-Host "Then double-click Play.bat to test."
+Write-Host "Done:"
+Write-Host "  monkeyaxe.jar  build intermediate (git-ignored)"
+Write-Host "  monkeyaxe.zip  the shipped game - COMMIT IT (unzip, then double-click Play.bat)"

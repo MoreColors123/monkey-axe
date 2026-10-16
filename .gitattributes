@@ -29,6 +29,7 @@
 *.dll           binary
 *.ear           binary
 *.jar           binary
+*.zip           binary
 *.so            binary
 *.war           binary
 *.jks           binary
