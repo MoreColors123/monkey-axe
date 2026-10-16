@@ -8,14 +8,18 @@ HOW TO PLAY (Windows)
    Pick  Operating System: Windows  ·  Architecture: x64  ·  Package Type: JRE
    and run the .msi installer (the default options are fine).
 
-2. Double-click  Play.bat  in this folder.
+2. Unzip  monkeyaxe.zip  anywhere and double-click  Play.bat.
 
-That's the whole install — the game and all of its art, music and sound are
-inside monkeyaxe.jar. Nothing else to download or build.
+That's the whole install — the game and all of its art, music and sound live
+inside monkeyaxe.jar; there are no separate data files and nothing else to
+download or build. Play.bat is only a small wrapper that finds your Java (and
+opens the download page if it is missing). With Java installed you can just as
+well double-click monkeyaxe.jar itself, or run
 
-If Java isn't found, Play.bat opens the download page for you and waits.
+    java -jar monkeyaxe.jar
 
-Other operating systems:   java -jar monkeyaxe.jar
+from any OS. (In a git checkout the jar sits in the repo root next to Play.bat,
+so step 2 is simply "double-click Play.bat".)
 
 
 CONTROLS

@@ -11,19 +11,23 @@ the select screen, in stage, in the HUD and in the ending.
 
 ## ▶ Play now (Windows) — nothing to build
 
-> **Easiest:** download the ready-to-run jar from the
-> [latest release](https://github.com/MoreColors123/monkey-axe/releases/latest), or
-> get the whole repo via **Code → Download ZIP**. Then follow the two steps below.
+> **Easiest:** download **`monkeyaxe.zip`** from the
+> [latest release](https://github.com/MoreColors123/monkey-axe/releases/latest)
+> and unzip it anywhere, or get the whole repo via **Code → Download ZIP**.
+> Releases published before the rename ship a bare `GoldenAxe.jar` — those work
+> too, you just have to start them with `java -jar GoldenAxe.jar`.
 
 1. **Install Java 17** (Temurin JRE):
    <https://adoptium.net/temurin/releases/?version=17>
    pick *Operating System: Windows → Architecture: x64 → Package Type: JRE →
    `.msi`*, run the installer (default options are fine).
-2. **Double-click `Play.bat`** in this folder.
+2. **Double-click `Play.bat`** in the unzipped folder (in the repo: in the root).
 
-That's the whole install — the game and all its art, music and sound are inside
-`monkeyaxe.jar`. (If `java` is already on your PATH, `java -jar monkeyaxe.jar`
-works from any OS.)
+That's the whole install — the game and all its art, music and sound live **inside
+`monkeyaxe.jar`**; no data files sit next to it and there is nothing else to
+download or build. `Play.bat` is only a small wrapper that finds your Java (and
+opens the download page if it is missing) — with Java installed you can just as
+well double-click the jar itself, or run `java -jar monkeyaxe.jar` on any OS.
 
 > The jar was renamed from `GoldenAxe.jar` to `monkeyaxe.jar`; release assets
 > published before the rename still carry the old name.

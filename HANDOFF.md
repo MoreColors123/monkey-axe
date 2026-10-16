@@ -58,9 +58,12 @@ Everything in the mod works and has been verified headlessly and in play:
 
 `make_release.ps1` compiles `src/**` + copies `assets/res` into a single
 `monkeyaxe.jar` **in the repo root** (Main-Class `main.Main`, assets at
-`/res/...` on the classpath). There is no `dist/` folder any more: ship the root
-jar (or the GitHub release asset). The target PC
-needs only a **Java 17 runtime** (`java -version` → 17+) and then double-clicks
+`/res/...` on the classpath) and then zips jar + `Play.bat` + `HowToPlay.txt`
+into **`monkeyaxe.zip`** — the one-file release download (untracked, `*.zip` is
+ignored; rebuild it per release). The release body is `HowToPlay.txt` plus the
+CONTROLS/CHEATS/CREDITS blocks, so keep that file as the single source for it.
+There is no `dist/` folder any more: ship the zip (or the bare root jar).
+The target PC needs only a **Java 17 runtime** (`java -version` → 17+) and then double-clicks
 `Play.bat` (or runs `java -jar monkeyaxe.jar`). No JDK, Ant, Python or assets
 folder is required. For a fully bundled runtime (no Java install at all) use
 `jpackage --input dist --main-jar monkeyaxe.jar --main-class main.Main
@@ -110,7 +113,7 @@ Launchers (double-click; `Play.bat` lives in the repo root, the rest in `scripts
 * `scripts\ReviewSprites.bat` — regenerates and opens `reviewer.html` (the sprite mapper).
 * `scripts\ViewAnimations.bat` — regenerates and opens `viewer.html`: a playable sandbox
   for the baked character (move, run, JUMP, ATTACK, JUMP+ATTACK, magic, hit, die).
-* `scripts\BuildRelease.bat` — rebuilds the shippable `monkeyaxe.jar` in the repo root.
+* `scripts\BuildRelease.bat` — rebuilds the shippable `monkeyaxe.jar` in the repo root and zips it with `Play.bat` + `HowToPlay.txt` into `monkeyaxe.zip` (the release download).
 * `scripts\ReviewMount.bat` — regenerates and opens `mount_editor.html`: drag the riding
   pose onto every beast, then Save (`mount_placements.json`).
 * `scripts\BuildSprites.bat` — bakes `mapping.json` into the game sprites.
