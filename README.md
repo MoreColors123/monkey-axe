@@ -9,6 +9,10 @@ the select screen, in stage, in the HUD and in the ending.
 
 ## ▶ Play now (Windows) — nothing to build
 
+> **Easiest:** download the ready-to-run jar from the
+> [latest release](https://github.com/MoreColors123/monkey-axe/releases/latest), or
+> get the whole repo via **Code → Download ZIP**. Then follow the two steps below.
+
 1. **Install Java 17** (Temurin JRE):
    <https://adoptium.net/temurin/releases/?version=17>
    pick *Operating System: Windows → Architecture: x64 → Package Type: JRE →
