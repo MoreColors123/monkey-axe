@@ -144,7 +144,7 @@ def main():
     sprites.extend(added)
     OUT_JSON.write_text(json.dumps(sprites, indent=1))
     print("wrote %s (total %d)" % (OUT_JSON.name, len(sprites)))
-    print("now run make_reviewer.py (or ReviewSprites.bat)")
+    print("now run make_reviewer.py (or scripts\ReviewSprites.bat)")
     return 0
 
 

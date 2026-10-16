@@ -2,7 +2,7 @@
 REM Open the visual sprite mapping editor (reviewer.html) with a local server so
 REM "Export mapping.json" can save in place (backup: mapping.backup.json).
 setlocal
-cd /d "%~dp0JavaGoldenAxe\tools\guybrush"
+cd /d "%~dp0..\JavaGoldenAxe\tools\guybrush"
 
 echo Regenerating reviewer.html ...
 python make_reviewer.py

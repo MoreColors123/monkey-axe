@@ -13,7 +13,7 @@ moves animate the way the game does (phase-driven jump arc, LEFT mirroring,
 attack combo). Vanilla Ax can be shown beside it.
 
     python make_viewer.py          # writes viewer.html
-Then open viewer.html (or double-click ViewAnimations.bat in the repo root).
+Then open viewer.html (or double-click scripts\ViewAnimations.bat).
 """
 import base64
 import json

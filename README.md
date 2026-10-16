@@ -48,12 +48,15 @@ navigate, ENTER to toggle/activate, ESC to close):
 
 Needs a **JDK 17** (not just a JRE). No Ant required.
 
+`Play.bat` stays in the repo root (double-click); the other launchers live in `scripts\`:
+
 - **`Play.bat`** — play (uses the committed `GoldenAxe.jar`).
-- **`GoldenAxe.bat`** — compile the sources and play (uses `run.ps1`; `.\run.ps1 -Rebuild` forces a recompile).
-- **`BuildRelease.bat`** — rebuild the shippable `GoldenAxe.jar` (game + assets).
-- **`BuildSprites.bat`** — re-bake the Guybrush sprites from `mapping.json`.
-- **`ReviewSprites.bat`** — open the sprite mapper (`reviewer.html`).
-- **`ViewAnimations.bat`** — open a playable move sandbox (`viewer.html`).
+- **`scripts\GoldenAxe.bat`** — compile the sources and play (uses `scripts\run.ps1`; `.\scripts\run.ps1 -Rebuild` forces a recompile).
+- **`scripts\BuildRelease.bat`** — rebuild the shippable `GoldenAxe.jar` (game + assets).
+- **`scripts\BuildSprites.bat`** — re-bake the Guybrush sprites from `mapping.json`.
+- **`scripts\ReviewSprites.bat`** — open the sprite mapper (`reviewer.html`).
+- **`scripts\ReviewMount.bat`** — place the riding pose on the beasts (`mount_editor.html`).
+- **`scripts\ViewAnimations.bat`** — open a playable move sandbox (`viewer.html`).
 
 The sprite tools also need **Python 3** with Pillow + numpy. See `HANDOFF.md`
 and `REVIEWER.md` for the full pipeline.

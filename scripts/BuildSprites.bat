@@ -1,7 +1,7 @@
 @echo off
 REM Bake mapping.json into the game's character sprites (then run GoldenAxe.bat).
 setlocal
-cd /d "%~dp0JavaGoldenAxe\tools\guybrush"
+cd /d "%~dp0..\JavaGoldenAxe\tools\guybrush"
 
 echo Rebuilding Guybrush character sprites from mapping.json ...
 python build_atlas.py

@@ -45,20 +45,21 @@ Everything in the mod works and has been verified headlessly and in play:
 4. ~~**Decide the fate of the mount gate.**~~ — DONE. Players always can mount.
 5. ~~**Restore Stage 1's walk-in + opening dialogue**~~ — DONE (the two
    `walk_to ... show_start_dialog_text` spawns are active again).
-6. ~~**Rebuild**~~ — `build-custom/` is deleted; the next `GoldenAxe.bat`
+6. ~~**Rebuild**~~ — `build-custom/` is deleted; the next `scripts\GoldenAxe.bat`
    recompiles and re-copies assets.
 7. **Commit** — the working tree holds the whole mod; see §14.
 
 ### Release build (how another PC runs it)
 
 ```powershell
-.\run.ps1 -Rebuild        # play locally (needs a JDK)
-.\BuildRelease.bat        # or: powershell -File make_release.ps1
+.\scripts\run.ps1 -Rebuild        # play locally (needs a JDK)
+.\scripts\BuildRelease.bat        # or: powershell -File make_release.ps1
 ```
 
 `make_release.ps1` compiles `src/**` + copies `assets/res` into a single
-`dist\GoldenAxe.jar` (Main-Class `main.Main`, assets at `/res/...` on the
-classpath) and writes `dist\Play.bat`. **Ship the `dist` folder.** The target PC
+`GoldenAxe.jar` **in the repo root** (Main-Class `main.Main`, assets at
+`/res/...` on the classpath). There is no `dist/` folder any more: ship the root
+jar (or the GitHub release asset). The target PC
 needs only a **Java 17 runtime** (`java -version` → 17+) and then double-clicks
 `Play.bat` (or runs `java -jar GoldenAxe.jar`). No JDK, Ant, Python or assets
 folder is required. For a fully bundled runtime (no Java install at all) use
@@ -101,19 +102,19 @@ the select screen, in-stage, in the HUD, and in the ending cutscene.
 | Python | `C:\Program Files\Inkscape\bin\python.exe` (first on PATH) with **Pillow + numpy** |
 | Workspace scratch | `C:\opencode\goldenaxeswitch\work` (NOT part of the repo) |
 
-Launchers (double-click, all in the repo root):
+Launchers (double-click; `Play.bat` lives in the repo root, the rest in `scripts/`):
 
-* `GoldenAxe.bat` — builds (first time) and plays.
-* `ReviewSprites.bat` — regenerates and opens `reviewer.html` (the sprite mapper).
-* `ViewAnimations.bat` — regenerates and opens `viewer.html`: a playable sandbox
+* `scripts\GoldenAxe.bat` — builds (first time) and plays.
+* `scripts\ReviewSprites.bat` — regenerates and opens `reviewer.html` (the sprite mapper).
+* `scripts\ViewAnimations.bat` — regenerates and opens `viewer.html`: a playable sandbox
   for the baked character (move, run, JUMP, ATTACK, JUMP+ATTACK, magic, hit, die).
-* `BuildRelease.bat` — builds the shippable `dist\GoldenAxe.jar` + `Play.bat`.
-* `ReviewMount.bat` — regenerates and opens `mount_editor.html`: drag the riding
+* `scripts\BuildRelease.bat` — rebuilds the shippable `GoldenAxe.jar` in the repo root.
+* `scripts\ReviewMount.bat` — regenerates and opens `mount_editor.html`: drag the riding
   pose onto every beast, then Save (`mount_placements.json`).
-* `BuildSprites.bat` — bakes `mapping.json` into the game sprites.
-* `run.ps1` — the engine behind the bats; `.\run.ps1 -Rebuild` forces recompile.
+* `scripts\BuildSprites.bat` — bakes `mapping.json` into the game sprites.
+* `scripts\run.ps1` — the engine behind the bats; `.\scripts\run.ps1 -Rebuild` forces recompile.
 
-> **Never launch the game yourself.** `GoldenAxe.bat`/`run.ps1` open a GUI window
+> **Never launch the game yourself.** `scripts\GoldenAxe.bat`/`scripts\run.ps1` open a GUI window
 > on the user's desktop. Ask the user to start the game and to test; do not run
 > it as an agent step. (Same for the two review bats — don't drive the user's
 > browser. An in-app/headless browser of your own for checking your own work is
@@ -221,14 +222,14 @@ assets/res/image/hud_magic_guybrush_threepwood.png   (copy of Ax's)
 assets/res/chars/hud_magic_guybrush_threepwood.char
 src/infra/CheatMenu.java                             (hidden "ape" cheat-menu overlay)
 tools/guybrush/viewer.html, make_viewer.py           (playable move sandbox)
-ViewAnimations.bat                                   (double-click the sandbox)
-BuildRelease.bat, make_release.ps1                   (build dist/GoldenAxe.jar + Play.bat)
+scripts/ViewAnimations.bat                           (double-click the sandbox)
+scripts/BuildRelease.bat, scripts/make_release.ps1   (build GoldenAxe.jar in the repo root)
 tools/guybrush/...                                   (see §6)
 tools/guybrush/mount_editor.html                     (mounted_* placement editor)
 tools/guybrush/mount_placements.json                 (the editor's drag results)
 tools/guybrush/make_mount_editor.py / serve_mount.py (build / serve that editor)
 tools/guybrush/apply_mount.py                        (placements -> mapping + layout)
-ReviewMount.bat                                      (double-click the editor)
+scripts/ReviewMount.bat                              (double-click the editor)
 HANDOFF.md (this file), REVIEWER.md, GUYBRUSH_MOD.md
 ```
 
@@ -341,7 +342,7 @@ chosen pose on the beasts by hand**:
 
 ```powershell
 cd JavaGoldenAxe\tools\guybrush
-python serve_mount.py           # or double-click ReviewMount.bat in the repo root
+python serve_mount.py           # or double-click scripts\ReviewMount.bat
 #   drag on each beast cell to position the pose, wheel to scale,
 #   click a thumbnail to swap the pose, ⇄ mirror to flip it, then Save placements
 python apply_mount.py           # placements -> mapping.json + layout rectangles
@@ -433,7 +434,7 @@ Current mount mapping (placed with the editor, applied by `apply_mount.py`):
 
 ## 8. Using the reviewer (`reviewer.html`)
 
-Open with `ReviewSprites.bat` (it regenerates the page from the current
+Open with `scripts\ReviewSprites.bat` (it regenerates the page from the current
 `sprites.json`/`mapping.json`, starts `serve_reviewer.py` on
 `http://127.0.0.1:8765/`, and opens it). The page is self-contained (everything is
 embedded as data URIs); the server exists only so Export can write to disk. The
@@ -467,7 +468,7 @@ top bar, **Sheet**, **Animations**, **Rectangles**, **Animation settings**,
   last frame exactly like in-game (`loop preview` repeats them for review).
 * **Export mapping.json** writes straight over `mapping.json`, first copying the
   previous file to `mapping.backup.json`. Needs the server, so launch via
-  `ReviewSprites.bat`; as a `file://` page Export falls back to a download.
+  `scripts\ReviewSprites.bat`; as a `file://` page Export falls back to a download.
 
 A red error banner appears at the top if the page throws.
 
@@ -643,7 +644,7 @@ a 3-part harness behind a single `TEST_MODE` flag (default off, revertible):
 
 ## 11. Verification workflow
 
-1. **Compile + run:** `.\run.ps1` (or `GoldenAxe.bat`). Needs a display — the user
+1. **Compile + run:** `.\scripts\run.ps1` (or `scripts\GoldenAxe.bat`). Needs a display — the user
    runs this, not you.
 2. **Headless asset check** (no display): build a classpath dir and use the
    scratch harnesses in `C:\opencode\goldenaxeswitch\work`:
@@ -721,7 +722,7 @@ a 3-part harness behind a single `TEST_MODE` flag (default off, revertible):
 | Character art | `assets/res/image/guybrush_threepwood.png` |
 | Edit the map | `tools/guybrush/mapping.json` |
 | Visual mapper | `tools/guybrush/reviewer.html` |
-| Move sandbox (press jump/attack) | `tools/guybrush/viewer.html` (`ViewAnimations.bat`) |
+| Move sandbox (press jump/attack) | `tools/guybrush/viewer.html` (`scripts/ViewAnimations.bat`) |
 | Reviewer server (in-place save) | `tools/guybrush/serve_reviewer.py` |
 | De-share layout tool | `tools/guybrush/deshare.py` |
 | Baker | `tools/guybrush/build_atlas.py` |

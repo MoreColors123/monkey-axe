@@ -4,7 +4,8 @@ param([switch]$Rebuild)
 
 $ErrorActionPreference = 'Stop'
 
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+# This file lives in scripts/; the repo root is its parent directory.
+$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $proj = Join-Path $root 'JavaGoldenAxe'
 $src  = Join-Path $proj 'src'
 $out  = Join-Path $proj 'build-custom'

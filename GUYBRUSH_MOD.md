@@ -38,7 +38,7 @@ or use the visual editor.
 
 ### Visual editor
 
-Double-click **`ReviewSprites.bat`** in the repo root. It regenerates
+Double-click **`scripts\ReviewSprites.bat`**. It regenerates
 `reviewer.html` and starts a tiny local server so the editor can **save
 `mapping.json` in place** (keeping the previous file as `mapping.backup.json`).
 In the page:
@@ -63,7 +63,7 @@ the full editor guide.
 ### The riding pose (the mount editor)
 
 The sheet has no pose of Guybrush riding a beast, so the seated look is made by
-**placing a pose on the beasts by hand**. Double-click **`ReviewMount.bat`**:
+**placing a pose on the beasts by hand**. Double-click **`scripts\ReviewMount.bat`**:
 
 * it shows every frame of every mountable beast (the two dragons and the
   chicken-leg) that has a mount point, with the rider drawn exactly as the game
@@ -87,9 +87,9 @@ would overlap). The reviewer shows the same settings — `mode: place` with an
 
 ### Bake it in
 
-Double-click **`BuildSprites.bat`** (runs `build_atlas.py`). This repaints
+Double-click **`scripts\BuildSprites.bat`** (runs `build_atlas.py`). This repaints
 `res/image/guybrush_threepwood.png` (and the `.char`/HUD files) from
-`mapping.json`. Then run `GoldenAxe.bat` to play.
+`mapping.json`. Then run `scripts\GoldenAxe.bat` to play.
 
 ### Under the hood
 
@@ -169,9 +169,9 @@ src/actor/Player.java                             (enum AX -> GUYBRUSH)
 src/infra/Actor.java                              (magic switch; draw order + corpse placement)
 src/infra/GoldenAxeGame.java                      (demo character)
 src/scene/SelectPlayer.java                       (select avatar)
-GoldenAxe.bat / run.ps1                           (double-click launcher)
-ReviewSprites.bat / BuildSprites.bat              (edit / bake the mapping)
-ReviewMount.bat                                   (place the riding pose on the beasts)
+scripts/GoldenAxe.bat / scripts/run.ps1          (double-click launcher)
+scripts/ReviewSprites.bat / scripts/BuildSprites.bat (edit / bake the mapping)
+scripts/ReviewMount.bat                           (place the riding pose on the beasts)
 tools/guybrush/guybrush_source.png                (source sheet)
 tools/guybrush/sprites.json                       (detected sprite catalog)
 tools/guybrush/mapping.json                       (editable animation -> sprite map)

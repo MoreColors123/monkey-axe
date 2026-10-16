@@ -14,10 +14,10 @@ bake with `build_atlas.py`.
 ## 1. How to open it
 
 ```
-ReviewSprites.bat         # regenerates reviewer.html, starts the server, opens the browser
+scripts\ReviewSprites.bat  # regenerates reviewer.html, starts the server, opens the browser
 ```
 
-`ReviewSprites.bat` runs `python make_reviewer.py` then `python serve_reviewer.py`.
+`scripts\ReviewSprites.bat` runs `python make_reviewer.py` then `python serve_reviewer.py`.
 The server (`http://127.0.0.1:8765/`, ports 8765–8775) exists **only** so the
 Export button can write `mapping.json` in place. `serve_reviewer.py --no-open`
 starts it without launching a browser (used for tests).
@@ -153,7 +153,7 @@ animation's current frames beside it.
   section name is ticked (remembered per browser). The agent prepends new
   proposals to `suggestions.json`, so they land on top.
 * **Approve** — applies the proposal to the *page* mapping (frames + mode +
-  scale, undoable). Then **Export mapping.json** + `BuildSprites.bat` as usual;
+  scale, undoable). Then **Export mapping.json** + `scripts\BuildSprites.bat` as usual;
   exporting does **not** change the suggestion status.
 * **Dismiss / Reopen** — marks the proposal rejected / back to open. Statuses
   and comments persist via `POST /api/suggestions` (atomic write to
@@ -175,7 +175,7 @@ regenerates `reviewer.html` with the new proposals) → approve/comment → Expo
   has an `animations` object, copies the current file to
   `mapping.backup.json` (beside it), then writes atomically (`.json.tmp` swap).
 * Without the server (plain `file://`) Export downloads `mapping.json`.
-* After exporting, bake with `BuildSprites.bat` (or `python build_atlas.py`).
+* After exporting, bake with `scripts\BuildSprites.bat` (or `python build_atlas.py`).
 
 ---
 
@@ -232,7 +232,7 @@ layout frames — `HANDOFF.md` §10).
 ## 11. The mount editor (sibling page)
 
 `mount_editor.html` (`make_mount_editor.py` + `serve_mount.py`, launched by
-`ReviewMount.bat`) is the companion tool for the **riding pose**, which cannot be
+`scripts/ReviewMount.bat`) is the companion tool for the **riding pose**, which cannot be
 judged in the reviewer because it only makes sense drawn *on a beast*.
 
 * It embeds the beast sheets (`dragon_blue`, `dragon_red`, `chicken_leg`), their
