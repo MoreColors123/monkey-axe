@@ -5,6 +5,8 @@ external libraries), with **Guybrush Threepwood** from *Monkey Island 2: LeChuck
 Revenge* as the first player character (the slot that used to be Ax Battler) — on
 the select screen, in stage, in the HUD and in the ending.
 
+![Golden Axe — Guybrush Threepwood mod](Screenshot.png)
+
 ---
 
 ## ▶ Play now (Windows) — nothing to build
