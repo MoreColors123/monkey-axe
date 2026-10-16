@@ -58,11 +58,13 @@ Everything in the mod works and has been verified headlessly and in play:
 
 `make_release.ps1` compiles `src/**` + copies `assets/res` into a single
 `monkeyaxe.jar` **in the repo root** (Main-Class `main.Main`, assets at
-`/res/...` on the classpath) and then zips jar + `Play.bat` + `HowToPlay.txt`
-into **`monkeyaxe.zip`** — the one-file release download (untracked, `*.zip` is
-ignored; rebuild it per release). The release body is `HowToPlay.txt` plus the
-CONTROLS/CHEATS/CREDITS blocks, so keep that file as the single source for it.
-There is no `dist/` folder any more: ship the zip (or the bare root jar).
+`/res/...` on the classpath) and then packs jar + `scripts\Play.bat` +
+`HowToPlay.txt` into **`monkeyaxe.zip`** — the one-file game that ships. The **zip is
+committed** (see the `!monkeyaxe.zip` rule in `.gitignore`): rebuild and commit it
+after every game change, and upload it as the release asset. The `monkeyaxe.jar`
+beside it is a git-ignored intermediate. The release body is `HowToPlay.txt` plus
+the CONTROLS/CHEATS/CREDITS blocks, so keep that file as the single source for it.
+There is no `dist/` folder any more.
 The target PC needs only a **Java 17 runtime** (`java -version` → 17+) and then double-clicks
 `Play.bat` (or runs `java -jar monkeyaxe.jar`). No JDK, Ant, Python or assets
 folder is required. For a fully bundled runtime (no Java install at all) use
@@ -107,13 +109,13 @@ the select screen, in-stage, in the HUD, and in the ending cutscene.
 | Python | any Python 3 with **Pillow + numpy** (`python -m pip install pillow numpy`); verified with Python 3.14 / Pillow 12.3 / numpy 2.5.4. If the launchers fail on `import PIL`, the deps are simply not installed |
 | Workspace scratch | outside the repo (e.g. the agent's own scratch dir) — not part of the repo, not tracked |
 
-Launchers (double-click; `Play.bat` lives in the repo root, the rest in `scripts/`):
+Launchers (all in `scripts/`; `Play.bat` is the one packed into the zip and finds the jar next to it or one level up):
 
 * `scripts\GoldenAxe.bat` — builds (first time) and plays.
 * `scripts\ReviewSprites.bat` — regenerates and opens `reviewer.html` (the sprite mapper).
 * `scripts\ViewAnimations.bat` — regenerates and opens `viewer.html`: a playable sandbox
   for the baked character (move, run, JUMP, ATTACK, JUMP+ATTACK, magic, hit, die).
-* `scripts\BuildRelease.bat` — rebuilds the shippable `monkeyaxe.jar` in the repo root and zips it with `Play.bat` + `HowToPlay.txt` into `monkeyaxe.zip` (the release download).
+* `scripts\BuildRelease.bat` — rebuilds the shipped `monkeyaxe.zip` (jar + `scripts\Play.bat` + `HowToPlay.txt`, committed) and leaves the jar in the root for local play.
 * `scripts\ReviewMount.bat` — regenerates and opens `mount_editor.html`: drag the riding
   pose onto every beast, then Save (`mount_placements.json`).
 * `scripts\BuildSprites.bat` — bakes `mapping.json` into the game sprites.
@@ -228,7 +230,7 @@ assets/res/chars/hud_magic_guybrush_threepwood.char
 src/infra/CheatMenu.java                             (hidden "ape" cheat-menu overlay)
 tools/guybrush/viewer.html, make_viewer.py           (playable move sandbox)
 scripts/ViewAnimations.bat                           (double-click the sandbox)
-scripts/BuildRelease.bat, scripts/make_release.ps1   (build monkeyaxe.jar in the repo root)
+scripts/BuildRelease.bat, scripts/make_release.ps1   (build jar + the shipped monkeyaxe.zip)
 tools/guybrush/...                                   (see §6)
 tools/guybrush/mount_editor.html                     (mounted_* placement editor)
 tools/guybrush/mount_placements.json                 (the editor's drag results)
@@ -338,8 +340,8 @@ The edit loop (Windows, no IDE needed) - after touching a sprite, sheet or
 ```bat
 scripts\ReviewSprites.bat     REM or ReviewMount.bat / ViewAnimations.bat - look at it
 scripts\BuildSprites.bat      REM bake mapping.json into the game assets
-scripts\BuildRelease.bat      REM rebuild the shipped jar (monkeyaxe.jar, repo root)
-Play.bat                      REM double-click to play
+scripts\BuildRelease.bat      REM rebuild the jar + the shipped monkeyaxe.zip (commit it!)
+scripts\Play.bat              REM play (finds ..\monkeyaxe.jar)
 ```
 
 For fast source-level iteration skip the jar entirely: `scripts\GoldenAxe.bat`

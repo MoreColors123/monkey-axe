@@ -13,15 +13,15 @@ the select screen, in stage, in the HUD and in the ending.
 
 **Easiest:** download **`monkeyaxe.zip`** from the
 [latest release](https://github.com/MoreColors123/monkey-axe/releases/latest) and
-unzip it anywhere — that is the game, complete. (Or get the whole repo via
-**Code → Download ZIP**: the same game plus the sources and the sprite tools.)
+unzip it anywhere — that is the game, complete. (The same zip sits in the repo
+root: get the repo via **Code → Download ZIP** and unzip *that* copy — it also
+brings the sources and the sprite tools.)
 
 1. **Install Java 17** (Temurin JRE):
    <https://adoptium.net/temurin/releases/?version=17>
    pick *Operating System: Windows → Architecture: x64 → Package Type: JRE →
    `.msi`*, run the installer (default options are fine).
-2. **Double-click `Play.bat`** in the unzipped folder (in a git checkout: in the
-   repo root).
+2. **Double-click the `Play.bat`** in that folder.
 
 That's the whole install — the game and all of its art, music and sound live
 **inside `monkeyaxe.jar`**; no data files sit next to it, and there is nothing else
@@ -47,9 +47,8 @@ Notes:
 
 | Path | What it is |
 |---|---|
-| `monkeyaxe.jar` | the committed build that `Play.bat` starts (code + all assets) |
-| `Play.bat` | Windows launcher for that jar |
-| `scripts\` | every other launcher: run, build, release, and the sprite tools |
+| `monkeyaxe.zip` | **the shipped game**: `monkeyaxe.jar` (code + all assets) + `Play.bat` + `HowToPlay.txt` — unzip and play |
+| `scripts\` | every launcher: `Play.bat` (the one that goes into the zip), run, build, release, sprite tools |
 | `JavaGoldenAxe\` | the game — `src\` (Java sources), `assets\res\` (art, music, stages), `tools\guybrush\` (sprite pipeline) |
 | `JavaGoldenAxeAnimationEditor2\` | the standalone animation editor the game's `.char`/`.ani` data was authored with |
 | `HANDOFF.md`, `REVIEWER.md`, `GUYBRUSH_MOD.md` | how the mod, the sprite pipeline and the release work |
@@ -76,19 +75,19 @@ navigate, ENTER to toggle/activate, ESC to close):
 
 Needs a **JDK 17** (not just a JRE); no Ant required. The sprite tools additionally need **Python 3 with Pillow + numpy** (`python -m pip install pillow numpy`).
 
-`Play.bat` stays in the repo root (double-click); the other launchers live in `scripts\`:
+Every launcher lives in `scripts\` — `Play.bat` is the one packed into the zip (it also works from the repo, finding the jar one level up):
 
-- **`Play.bat`** — play (uses the committed `monkeyaxe.jar`).
+- **`scripts\Play.bat`** — play (`..\monkeyaxe.jar`, or the jar right next to it inside the unzipped zip).
 - **`scripts\GoldenAxe.bat`** — compile the sources and play (uses `scripts\run.ps1`; `.\scripts\run.ps1 -Rebuild` forces a recompile).
-- **`scripts\BuildRelease.bat`** — rebuild the shippable `monkeyaxe.jar` **and** `monkeyaxe.zip` (jar + `Play.bat` + `HowToPlay.txt`, i.e. the release download).
+- **`scripts\BuildRelease.bat`** — rebuild the shipped `monkeyaxe.zip` (jar + `Play.bat` + `HowToPlay.txt`); the jar it packs stays in the root as a git-ignored intermediate.
 - **`scripts\BuildSprites.bat`** — re-bake the Guybrush sprites from `mapping.json`.
 - **`scripts\ReviewSprites.bat`** — open the sprite mapper (`reviewer.html`).
 - **`scripts\ReviewMount.bat`** — place the riding pose on the beasts (`mount_editor.html`).
 - **`scripts\ViewAnimations.bat`** — open a playable move sandbox (`viewer.html`).
 
-The usual loop: change a sprite → **`scripts\ReviewSprites.bat`** to check it → **`scripts\BuildSprites.bat`** to bake it in → **`scripts\BuildRelease.bat`** to rebuild the jar → **`Play.bat`** to play it. For pure source edits skip the jar entirely: **`scripts\GoldenAxe.bat`** compiles and runs straight from `JavaGoldenAxe\assets\res`.
+The usual loop: change a sprite → **`scripts\ReviewSprites.bat`** to check it → **`scripts\BuildSprites.bat`** to bake it in → **`scripts\BuildRelease.bat`** to rebuild the jar and the shipped zip → **`scripts\Play.bat`** to play it. For pure source edits skip the jar entirely: **`scripts\GoldenAxe.bat`** compiles and runs straight from `JavaGoldenAxe\assets\res`.
 
-Both artifacts land in the repo root; the **jar is committed** (so a clone is playable at once), the **zip is a release artifact** and stays untracked. For a machine with no Java at all, `jpackage` can bundle a runtime — see `HANDOFF.md`.
+**`monkeyaxe.zip` is the committed build**: after every game change rebuild it and commit it — and upload it to the release — or clones and downloads keep serving the old game. The jar beside it is only a build intermediate and is git-ignored. For a machine with no Java at all, `jpackage` can bundle a runtime — see `HANDOFF.md`.
 
 See `HANDOFF.md` and `REVIEWER.md` for the full sprite pipeline.
 

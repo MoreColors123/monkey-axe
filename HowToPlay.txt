@@ -18,8 +18,8 @@ well double-click monkeyaxe.jar itself, or run
 
     java -jar monkeyaxe.jar
 
-from any OS. (In a git checkout the jar sits in the repo root next to Play.bat,
-so step 2 is simply "double-click Play.bat".)
+from any OS. (In a git checkout monkeyaxe.zip sits in the repo root — unzip it and
+double-click the Play.bat inside.)
 
 
 CONTROLS
