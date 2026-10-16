@@ -38,8 +38,6 @@ from any OS.
 Notes:
 
 - Java **17 or newer** is all that's needed — no JDK, no Ant, no Python.
-- `monkeyaxe.jar` was called `GoldenAxe.jar` up to the rename; release assets
-  published before it still carry the old name and still work.
 - Double-clicking the jar does nothing? Then your system has no `.jar`
   association — use `Play.bat`, which always works.
 
@@ -53,6 +51,9 @@ Notes:
 | `JavaGoldenAxeAnimationEditor2\` | the standalone animation editor the game's `.char`/`.ani` data was authored with |
 | `HANDOFF.md`, `REVIEWER.md`, `GUYBRUSH_MOD.md` | how the mod, the sprite pipeline and the release work |
 | `HowToPlay.txt` | player instructions (also the text of the GitHub release) |
+| `Screenshot.png` | the gameplay screenshot shown at the top of this file |
+| `.github\` | GitHub's automatic build check (`Java CI` workflow) |
+| `.gitattributes` | Git's file-type hints (Java sources as text, jars/zips untouched) |
 
 ## Controls
 

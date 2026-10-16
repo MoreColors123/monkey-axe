@@ -69,9 +69,7 @@ The target PC needs only a **Java 17 runtime** (`java -version` → 17+) and the
 `Play.bat` (or runs `java -jar monkeyaxe.jar`). No JDK, Ant, Python or assets
 folder is required. For a fully bundled runtime (no Java install at all) use
 `jpackage --input dist --main-jar monkeyaxe.jar --main-class main.Main
---type app-image --name GoldenAxe` (per-platform). The root jar was renamed
-from `GoldenAxe.jar` to `monkeyaxe.jar` - release assets published before the
-rename keep the old name.
+--type app-image --name GoldenAxe` (per-platform).
 
 ### Known open issues (details in §10)
 
