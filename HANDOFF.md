@@ -101,9 +101,9 @@ the select screen, in-stage, in the HUD, and in the ending cutscene.
 | Thing | Value |
 | --- | --- |
 | Repo root | wherever the clone lives (e.g. `D:\hermes\monkey-axe`) — never hardcode it |
-| Branch | `guybrush-mod` |
+| Branch | `main` (default; the mod work used to live on `guybrush-mod`, which was merged into `main` and deleted) |
 | Java | Temurin **17** (`javac`/`java` on PATH; installed here via `scoop install temurin17-jdk`) |
-| Ant | **not installed** — do not rely on `ant`; use `run.ps1` |
+| Ant | **not installed here** — do not rely on local `ant`; use `run.ps1`. GitHub Actions *does* build with Ant (`JavaGoldenAxe/build.xml`) on every push to `main` |
 | Python | any Python 3 with **Pillow + numpy** (`python -m pip install pillow numpy`); verified with Python 3.14 / Pillow 12.3 / numpy 2.5.4. If the launchers fail on `import PIL`, the deps are simply not installed |
 | Workspace scratch | outside the repo (e.g. the agent's own scratch dir) — not part of the repo, not tracked |
 
