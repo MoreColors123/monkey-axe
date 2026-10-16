@@ -358,7 +358,7 @@ TEMPLATE = r"""<!doctype html>
        (also <code>Ctrl+Shift+Z</code>).</p>
     <p><b>Export mapping.json</b> saves in place, keeping the previous file as
        <code>mapping.backup.json</code>, when the page is launched via
-       <code>ReviewSprites.bat</code>; opened as a plain file it downloads instead.</p>
+       <code>scripts\ReviewSprites.bat</code>; opened as a plain file it downloads instead.</p>
   </div>
 </div>
 <div id="toast"></div>
@@ -744,7 +744,7 @@ function renderSuggestions(){
   document.getElementById('suggcount').textContent =
     shown.length + ' shown, ' + open + ' open of ' + suggestions.length + ' total';
   if (!suggestions.length){
-    el.innerHTML = '<div class="hint">No suggestions right now. Proposals are written to suggestions.json and appear here after ReviewSprites.bat regenerates the page.</div>';
+    el.innerHTML = '<div class="hint">No suggestions right now. Proposals are written to suggestions.json and appear here after scripts\ReviewSprites.bat regenerates the page.</div>';
     return;
   }
   if (!shown.length){
@@ -1131,7 +1131,7 @@ document.getElementById('export').onclick = async () => {
       st.style.color = '#ffb0b0';
     }
   } else {
-    st.textContent = 'Opened as a file: downloading mapping.json (run ReviewSprites.bat to save in place).';
+    st.textContent = 'Opened as a file: downloading mapping.json (run scripts\ReviewSprites.bat to save in place).';
     st.style.color = '#ffd84a';
   }
   const a = document.createElement('a');

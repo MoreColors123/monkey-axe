@@ -4,7 +4,7 @@ button can write mapping.json in place (keeping the previous file as
 mapping.backup.json).
 
 Opened directly as a file:// page a browser cannot write to disk, so
-ReviewSprites.bat launches this instead. Ctrl+C in the console stops it.
+scripts\\ReviewSprites.bat launches this instead. Ctrl+C in the console stops it.
 """
 import json
 import shutil
