@@ -11,11 +11,11 @@ HOW TO PLAY (Windows)
 2. Double-click  Play.bat  in this folder.
 
 That's the whole install — the game and all of its art, music and sound are
-inside GoldenAxe.jar. Nothing else to download or build.
+inside monkeyaxe.jar. Nothing else to download or build.
 
 If Java isn't found, Play.bat opens the download page for you and waits.
 
-Other operating systems:   java -jar GoldenAxe.jar
+Other operating systems:   java -jar monkeyaxe.jar
 
 
 CONTROLS

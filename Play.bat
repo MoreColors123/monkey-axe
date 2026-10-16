@@ -9,13 +9,13 @@ if errorlevel 1 if defined JAVA_HOME if exist "%JAVA_HOME%\bin\java.exe" set "JA
 "%JAVA%" -version >nul 2>nul
 if errorlevel 1 goto nojava
 
-if not exist "GoldenAxe.jar" (
-    echo GoldenAxe.jar is missing. Rebuild it with BuildRelease.bat ^(needs a JDK^).
+if not exist "monkeyaxe.jar" (
+    echo monkeyaxe.jar is missing. Rebuild it with scripts\BuildRelease.bat ^(needs a JDK^).
     pause
     exit /b 1
 )
 
-"%JAVA%" -jar "GoldenAxe.jar"
+"%JAVA%" -jar "monkeyaxe.jar"
 if errorlevel 1 pause
 exit /b 0
 

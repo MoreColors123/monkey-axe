@@ -57,14 +57,16 @@ Everything in the mod works and has been verified headlessly and in play:
 ```
 
 `make_release.ps1` compiles `src/**` + copies `assets/res` into a single
-`GoldenAxe.jar` **in the repo root** (Main-Class `main.Main`, assets at
+`monkeyaxe.jar` **in the repo root** (Main-Class `main.Main`, assets at
 `/res/...` on the classpath). There is no `dist/` folder any more: ship the root
 jar (or the GitHub release asset). The target PC
 needs only a **Java 17 runtime** (`java -version` → 17+) and then double-clicks
-`Play.bat` (or runs `java -jar GoldenAxe.jar`). No JDK, Ant, Python or assets
+`Play.bat` (or runs `java -jar monkeyaxe.jar`). No JDK, Ant, Python or assets
 folder is required. For a fully bundled runtime (no Java install at all) use
-`jpackage --input dist --main-jar GoldenAxe.jar --main-class main.Main
---type app-image --name GoldenAxe` (per-platform).
+`jpackage --input dist --main-jar monkeyaxe.jar --main-class main.Main
+--type app-image --name GoldenAxe` (per-platform). The root jar was renamed
+from `GoldenAxe.jar` to `monkeyaxe.jar` - release assets published before the
+rename keep the old name.
 
 ### Known open issues (details in §10)
 
@@ -108,7 +110,7 @@ Launchers (double-click; `Play.bat` lives in the repo root, the rest in `scripts
 * `scripts\ReviewSprites.bat` — regenerates and opens `reviewer.html` (the sprite mapper).
 * `scripts\ViewAnimations.bat` — regenerates and opens `viewer.html`: a playable sandbox
   for the baked character (move, run, JUMP, ATTACK, JUMP+ATTACK, magic, hit, die).
-* `scripts\BuildRelease.bat` — rebuilds the shippable `GoldenAxe.jar` in the repo root.
+* `scripts\BuildRelease.bat` — rebuilds the shippable `monkeyaxe.jar` in the repo root.
 * `scripts\ReviewMount.bat` — regenerates and opens `mount_editor.html`: drag the riding
   pose onto every beast, then Save (`mount_placements.json`).
 * `scripts\BuildSprites.bat` — bakes `mapping.json` into the game sprites.
@@ -223,7 +225,7 @@ assets/res/chars/hud_magic_guybrush_threepwood.char
 src/infra/CheatMenu.java                             (hidden "ape" cheat-menu overlay)
 tools/guybrush/viewer.html, make_viewer.py           (playable move sandbox)
 scripts/ViewAnimations.bat                           (double-click the sandbox)
-scripts/BuildRelease.bat, scripts/make_release.ps1   (build GoldenAxe.jar in the repo root)
+scripts/BuildRelease.bat, scripts/make_release.ps1   (build monkeyaxe.jar in the repo root)
 tools/guybrush/...                                   (see §6)
 tools/guybrush/mount_editor.html                     (mounted_* placement editor)
 tools/guybrush/mount_placements.json                 (the editor's drag results)
@@ -326,6 +328,21 @@ reviewer.html         self-contained visual mapper (embeds everything as data UR
 viewer.html           self-contained move sandbox (plays the baked character)
 mount_editor.html     self-contained mount placement editor
 ```
+
+The edit loop (Windows, no IDE needed) - after touching a sprite, sheet or
+`mapping.json`:
+
+```bat
+scripts\ReviewSprites.bat     REM or ReviewMount.bat / ViewAnimations.bat - look at it
+scripts\BuildSprites.bat      REM bake mapping.json into the game assets
+scripts\BuildRelease.bat      REM rebuild the shipped jar (monkeyaxe.jar, repo root)
+Play.bat                      REM double-click to play
+```
+
+For fast source-level iteration skip the jar entirely: `scripts\GoldenAxe.bat`
+compiles and runs straight from `assets\res` (`.\scripts\run.ps1 -Rebuild` forces
+a recompile), so an edited sprite shows up without packaging anything. The jar is
+only needed for the shippable build / for players.
 
 Typical commands:
 ```powershell

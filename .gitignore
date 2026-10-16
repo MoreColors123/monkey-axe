@@ -13,7 +13,7 @@
 # Package Files #
 *.jar
 # ...but the shipped game jar is committed on purpose (double-click Play.bat)
-!GoldenAxe.jar
+!monkeyaxe.jar
 *.war
 *.nar
 *.ear

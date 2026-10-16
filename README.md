@@ -22,8 +22,11 @@ the select screen, in stage, in the HUD and in the ending.
 2. **Double-click `Play.bat`** in this folder.
 
 That's the whole install — the game and all its art, music and sound are inside
-`GoldenAxe.jar`. (If `java` is already on your PATH, `java -jar GoldenAxe.jar`
+`monkeyaxe.jar`. (If `java` is already on your PATH, `java -jar monkeyaxe.jar`
 works from any OS.)
+
+> The jar was renamed from `GoldenAxe.jar` to `monkeyaxe.jar`; release assets
+> published before the rename still carry the old name.
 
 > If Java isn't found, `Play.bat` opens the download page for you and waits.
 
@@ -50,13 +53,15 @@ Needs a **JDK 17** (not just a JRE). No Ant required.
 
 `Play.bat` stays in the repo root (double-click); the other launchers live in `scripts\`:
 
-- **`Play.bat`** — play (uses the committed `GoldenAxe.jar`).
+- **`Play.bat`** — play (uses the committed `monkeyaxe.jar`).
 - **`scripts\GoldenAxe.bat`** — compile the sources and play (uses `scripts\run.ps1`; `.\scripts\run.ps1 -Rebuild` forces a recompile).
-- **`scripts\BuildRelease.bat`** — rebuild the shippable `GoldenAxe.jar` (game + assets).
+- **`scripts\BuildRelease.bat`** — rebuild the shippable `monkeyaxe.jar` (game + assets).
 - **`scripts\BuildSprites.bat`** — re-bake the Guybrush sprites from `mapping.json`.
 - **`scripts\ReviewSprites.bat`** — open the sprite mapper (`reviewer.html`).
 - **`scripts\ReviewMount.bat`** — place the riding pose on the beasts (`mount_editor.html`).
 - **`scripts\ViewAnimations.bat`** — open a playable move sandbox (`viewer.html`).
+
+The usual loop: change a sprite → **`scripts\ReviewSprites.bat`** to check it → **`scripts\BuildSprites.bat`** to bake it in → **`scripts\BuildRelease.bat`** to rebuild `monkeyaxe.jar` → **`Play.bat`** to play it. (For pure source edits, `scripts\GoldenAxe.bat` runs without building a jar.)
 
 The sprite tools also need **Python 3** with Pillow + numpy. See `HANDOFF.md`
 and `REVIEWER.md` for the full pipeline.
