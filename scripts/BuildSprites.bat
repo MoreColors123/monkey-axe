@@ -1,5 +1,5 @@
 @echo off
-REM Bake mapping.json into the game's character sprites (then run GoldenAxe.bat).
+REM Bake mapping.json into the game's character sprites (then run scripts\GoldenAxe.bat).
 setlocal
 cd /d "%~dp0..\JavaGoldenAxe\tools\guybrush"
 
@@ -13,6 +13,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Done. Run GoldenAxe.bat to play.
+echo Done. Run scripts\GoldenAxe.bat to play.
 pause
 endlocal
