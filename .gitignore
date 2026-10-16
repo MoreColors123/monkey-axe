@@ -45,3 +45,9 @@ JavaGoldenAxe/tools/guybrush/mapping.json.tmp
 JavaGoldenAxe/tools/guybrush/sprites.backup.json
 JavaGoldenAxe/tools/guybrush/__pycache__/
 
+# Ant/NetBeans build output (rebuilt locally; the shipped jar comes from make_release.ps1)
+JavaGoldenAxe/build/
+JavaGoldenAxeAnimationEditor2/build/
+
+# NetBeans per-user state (machine-local paths, regenerated on open)
+*/nbproject/private/
