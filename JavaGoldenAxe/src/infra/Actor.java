@@ -276,7 +276,16 @@ public class Actor extends Entity implements Comparable<Actor> {
     // resting (mountable) state instead of being killed with the rider.
     public void forceKill() {
         if (mountedActor != null) {
+            Actor beast = mountedActor;
             mountedActor.unmount();
+            // A corpse falls to the ground beside the beast. unmount() leaves
+            // the released rider at beast.wz + 0.01 and still at saddle height,
+            // which sorted it IN FRONT of a live rider on the same beast
+            // (beast.wz + 0.000001), so it was drawn covering whoever rode that
+            // beast next. Put it just behind the beast, on the floor.
+            wz = beast.getWz() - 0.01;
+            wy = Terrain.getHeight(wx, wz);
+            floorHeight = wy;
         }
         energy = 0;
         if (stateManager.isStateAvailable("dying")) {
@@ -397,7 +406,12 @@ public class Actor extends Entity implements Comparable<Actor> {
     }
 
     public boolean isInvincible() {
-        return invincible;
+        if (invincible) {
+            return true;
+        }
+        // TEST: cheat-menu invincibility ("ape") applies to the players only.
+        return GoldenAxeGame.TEST_INVINCIBLE
+                && (control == Control.PLAYER_1 || control == Control.PLAYER_2);
     }
     
     public void setInvincible(long duration) {
@@ -1108,19 +1122,17 @@ public class Actor extends Entity implements Comparable<Actor> {
     public void react(
             Reaction reaction, Collider sourceCollider, Actor sourceActor) {
         
-        if (control == Control.PLAYER_1 || control == Control.PLAYER_2) {
-            GoldenAxeGame.debugLog("[react] " + getId() + " reaction=" + reaction
-                    + " from=" + sourceActor.getId()
-                    + " state=" + stateManager.getCurrentState().getName()
-                    + " energy=" + energy
-                    + " wx=" + Math.round(wx) + " wz=" + Math.round(wz)
-                    + " wy=" + Math.round(wy));
-        }
-        
         boolean hit = reaction == STUNNED_1 || reaction == STUNNED_2 
                             || reaction == KNOCK_DOWN; 
         
         if (hit) {
+            // Turn to face whoever hit us, as in the original game (you get hit,
+            // you spin to face the attacker). The reaction art is authored facing
+            // right and mirrored by `direction` like every other animation, so
+            // without this a hit from behind showed the character's back.
+            if (sourceActor != null) {
+                direction = sourceActor.getWx() >= wx ? RIGHT : LEFT;
+            }
             onHit(reaction, sourceCollider, sourceActor);
         }
         
@@ -1189,24 +1201,9 @@ public class Actor extends Entity implements Comparable<Actor> {
                 String currentStateName = 
                                 stateManager.getCurrentState().getName();
                 // Anyone (player or enemy) can touch-mount a riderless beast, as
-                // in the original. X gates only the player's ability, for
-                // testing. Kill a mounted rider with Y and the beast is released
-                // back to resting (see forceKill).
-                boolean playerRider = control == Control.PLAYER_1 
-                                        || control == Control.PLAYER_2;
-                boolean canMount = !playerRider 
-                                        || GoldenAxeGame.TEST_PLAYER_CAN_MOUNT;
-                String mountDebug = "[mount] " + getId() + " touched " + sourceActor.getId()
-                        + ": playerRider=" + playerRider
-                        + " flag=" + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT
-                        + " available=" + stateManager.isStateAvailable("mounting")
-                        + " state=" + currentStateName
-                        + " beastBusy=" + (sourceActor.mountingActor != null);
-                System.out.println(mountDebug);
-                GoldenAxeGame.debugLog(mountDebug);
-                
-                if (canMount
-                    && stateManager.isStateAvailable("mounting") 
+                // in the original. The player used to be gated behind a test
+                // toggle (X); that gate is gone, so players always can.
+                if (stateManager.isStateAvailable("mounting") 
                     && (currentStateName.equals("walking")
                         || currentStateName.equals("walk_to"))
                             && sourceActor.mountingActor == null) {
@@ -1246,17 +1243,34 @@ public class Actor extends Entity implements Comparable<Actor> {
     @Override
     public int compareTo(Actor o) {
         
-        // ensure actors like chicken leg is 
-        // updated and drawn before mouting actor
-        double az = 0.0;
-        if (mountedActor != null) {
-            az += 0.000001;
-        }
-        if (mountingActor != null) {
-            az -= 0.000001;
+        // Depth order. The original version compared "wz + az" against the
+        // other actor's plain "wz", where az was +1e-6 for a beast carrying a
+        // rider and -1e-6 for a rider: an asymmetric comparison that cancels
+        // out for the pair itself (a rider gets wz = beast.wz + 0.000001 when
+        // it mounts, see Mounting/Mounted) and can violate the sort contract
+        // against third actors. The epsilon the mount code already puts in the
+        // rider's wz orders the pair on its own, so compare plain depths here.
+        int depth = Double.compare(wz, o.wz);
+        if (depth != 0) {
+            return depth;
         }
         
-        return (int) Math.signum((wz + az) - o.wz);
+        // Same depth. The sort is stable, so this used to fall back to list
+        // order - i.e. spawn order - and because the players are spawned first,
+        // any enemy or corpse standing at the player's exact z was drawn ON TOP
+        // of the player. That tie is the normal case here, not a rarity: the
+        // enemy AI steers its z to the player's z in whole pixels
+        // (Enemy.walkDifZ / difZ). Draw the player last instead, so the player
+        // is never buried by a corpse at the same depth.
+        boolean thisPlayer = isPlayerControlled();
+        if (thisPlayer != o.isPlayerControlled()) {
+            return thisPlayer ? 1 : -1;
+        }
+        return 0;       // otherwise keep the previous (stable) order
+    }
+    
+    protected boolean isPlayerControlled() {
+        return control == PLAYER_1 || control == PLAYER_2;
     }
 
     // --- states ---
@@ -1618,6 +1632,16 @@ public class Actor extends Entity implements Comparable<Actor> {
             super("jumping");
         }
 
+        // true while this actor's player holds the attack button (enemies/IA
+        // have no attack button, so they count as "held" and keep the pose)
+        private boolean isAttackHeld() {
+            return switch (control) {
+                case PLAYER_1 -> Input.isKeyPressed(KEY_PLAYER_1_ATTACK);
+                case PLAYER_2 -> Input.isKeyPressed(KEY_PLAYER_2_ATTACK);
+                default -> true;
+            };
+        }
+
         @Override
         public void onEnter() {
             animationPlayer.setAnimation("jumping");
@@ -1646,6 +1670,17 @@ public class Actor extends Entity implements Comparable<Actor> {
                 animationPlayer.setAnimation("jumping_attack");
                 Audio.playSound("attack_swing");
             }
+            else if (attacking && !isAttackHeld()
+                && animationPlayer.getCurrentAnimation().getName()
+                    .equals("jumping_attack")) {
+                // The player let go of the attack button: drop the airborne
+                // attack pose and go back to the ordinary jump. So the jump
+                // attack is held for as long as attack is held. (The running
+                // death stab is committed and holds to touch-down; enemies have
+                // no button and hold to touch-down too.)
+                attacking = false;
+                animationPlayer.setAnimation("jumping");
+            }
             else if (attacking && getTime() >= attackEndTime && running 
                 && !animationPlayer.getCurrentAnimation().getName()
                     .equals("jumping_death_stab")
@@ -1656,16 +1691,7 @@ public class Actor extends Entity implements Comparable<Actor> {
                 // https://strategywiki.org/wiki/Golden_Axe/Moves_and_Controls
                 animationPlayer.setAnimation("jumping_death_stab");
             }
-            else if (attacking && getTime() >= attackEndTime && !running) {
-                attacking = false;
-                animationPlayer.setAnimation("jumping");
-                animationPlayer.setCurrentAnimationFrameIndex(1.0);
-                attackWaitTime = getTime() + 90;
-            }
-            else if (!attacking && vy > 0.0) {
-                animationPlayer.setAnimation("jumping");
-                animationPlayer.setCurrentAnimationFrameIndex(1.0);
-            }
+            // An airborne attack pose is otherwise held until touch-down.
             
             if (onFloor) {
                 stateManager.switchTo("walking");
@@ -1679,6 +1705,21 @@ public class Actor extends Entity implements Comparable<Actor> {
                         || a.equals("jumping_death_stab")) {
                     
                     animationPlayer.update();
+                }
+            }
+            else {
+                // Drive the jump pose from the physics phase so take-off, apex
+                // and touch-down line up with the arc: the first frame at
+                // take-off, the middle at the apex, the last at touch-down.
+                // Vanilla characters have two frames, so this just hops
+                // between their two poses exactly as before.
+                double v0 = running ? jumpRunSpeed : jumpWalkSpeed;
+                double t = Util.clamp((vy + v0) / (2.0 * v0), 0.0, 1.0);
+                int frames = animationPlayer.getCurrentAnimation()
+                        .getFramesCount();
+                if (frames > 1) {
+                    animationPlayer.setCurrentAnimationFrameIndex(
+                            Math.round(t * (frames - 1)));
                 }
             }
         }

@@ -34,15 +34,8 @@ command 0 SHADOW_SHEAR_TRANSITION -0.75 1.00
 command 420 SHADOW_SHEAR_TRANSITION 0.0 0.015
 command 1100 SHADOW_SHEAR_TRANSITION 0.75 0.015
 
-# INTRO DISABLED FOR TESTING: players spawn in "walking" (free control) at the
-# arena instead of walking in with the opening dialogue. To restore the intro,
-# comment the two "walking" SPAWNs below and uncomment the two walk_to ones.
-#command 0 SPAWN player_1 24 400 walk_to _ _ walk_to 128 400 null show_start_dialog_text 
-#command 0 SPAWN player_2 8 380 walk_to _ _ walk_to 96 380 null show_start_dialog_text 
-
-#test
-command 0 SPAWN player_1 128 400 walking
-command 0 SPAWN player_2 128 380 walking
+command 0 SPAWN player_1 24 400 walk_to _ _ walk_to 128 400 null show_start_dialog_text 
+command 0 SPAWN player_2 8 380 walk_to _ _ walk_to 96 380 null show_start_dialog_text 
 
 camera_lock wave_0 150 false 0 false 0
 camera_lock wave_1 350 false 0 false 0
@@ -51,6 +44,7 @@ camera_lock wave_3 820 false 0 false 0
 camera_lock wave_4 900 false 0 false 0
 camera_lock wave_5 1200 true 2000 true 0
 
+# test arena reverted for shipping (use the cheat menu's MOUNT BEAST instead):
 #command 0 SPAWN chicken_leg default chicken_leg_0 empty 150 350 resting
 #command 0 SPAWN dragon_blue default dragon_blue_0 empty 150 380 resting
 #command 0 SPAWN dragon_red default dragon_red_0 empty 150 410 resting

@@ -23,8 +23,9 @@ a PNG spritesheet (`res/image/<character-id>.png`).
 
 Rather than hand-author a brand-new rig, the mod reuses Ax Battler's exact frame
 layout (so all hitboxes, grab points and state names keep working) and *bakes*
-Guybrush art into a fresh spritesheet (600×1000, grown after the layout was
-de-shared — currently 654×1053). The new character is registered as
+Guybrush art into a fresh spritesheet (currently 2505×2166 — it grows as
+rectangles are de-shared and the mount rectangles are resized to fit the riding
+pose). The new character is registered as
 `guybrush_threepwood`, which maps 1:1 onto the existing animation names
 (`idle`, `walking_down`, `walking_up`,
 `running`, `attack_1..7`, `attack_special`, `jumping`, `knock_down`, `dying`, ...).
@@ -59,6 +60,31 @@ When you are happy, click **Export mapping.json** — it saves straight over
 `JavaGoldenAxe/tools/guybrush/mapping.json`. See [REVIEWER.md](REVIEWER.md) for
 the full editor guide.
 
+### The riding pose (the mount editor)
+
+The sheet has no pose of Guybrush riding a beast, so the seated look is made by
+**placing a pose on the beasts by hand**. Double-click **`ReviewMount.bat`**:
+
+* it shows every frame of every mountable beast (the two dragons and the
+  chicken-leg) that has a mount point, with the rider drawn exactly as the game
+  will draw it;
+* **drag** to position the pose, **wheel** to scale it, click a thumbnail to swap
+  the pose, and **⇄ mirror** to flip it (the `*_flip` animations sit on beast
+  frames that are drawn mirrored, so the rider must be mirrored there too);
+* **Save placements** writes `mount_placements.json`.
+
+Then bake it in:
+
+```powershell
+python apply_mount.py     # placements -> mapping.json + the frame rectangles
+python build_atlas.py     # bake
+```
+
+`apply_mount.py` resizes the mount rectangles so the dropped pose always fits
+(nothing else in the layout is touched, and it refuses to write if two rectangles
+would overlap). The reviewer shows the same settings — `mode: place` with an
+`offset` and a `mirror` flag — so the two tools never disagree.
+
 ### Bake it in
 
 Double-click **`BuildSprites.bat`** (runs `build_atlas.py`). This repaints
@@ -74,6 +100,9 @@ make_reviewer.py   ->  reviewer.html  the editor
 serve_reviewer.py  ->  local server   lets the editor save mapping.json in place
 deshare.py         ->  layout         gives every animation its own rectangles
 build_atlas.py     ->  game assets    mapping.json + sprites.json -> spritesheet
+make_mount_editor.py -> mount_editor.html  the riding-pose placement editor
+serve_mount.py     ->  local server   serves both pages, saves the placements
+apply_mount.py     ->  mapping+layout placements -> mapping.json + rectangles
 patch_select.py    ->  select screen  swaps the portrait
 ```
 
@@ -122,7 +151,7 @@ Inkscape's bundled build, already has both).
 | `magic` | horn-blow poses (`s1142`/`s1145`) |
 | `grab_and_throw` | grab / throw poses |
 | `stunned_1/2`, `stand_up` | stunned / getting-up poses |
-| `mounting`, `mounted_*` | stand-in walk pose; player mount behind the X test toggle |
+| `mounting`, `mounted_*` | **hand-placed riding pose** (a lunging stance, `s0443`), mirrored for the `*_flip` animations; positioned per beast in the mount editor |
 | `knock_down`, `thrown`, `resting`, `dying`, `dead` | lying on ground |
 
 ## Files changed
@@ -137,19 +166,25 @@ assets/res/image/select_player.png                (Ax portrait -> Guybrush)
 assets/res/chars/select_player.char               (sprite ax -> guybrush)
 assets/res/anim/ending.ani                        (ending actor -> guybrush)
 src/actor/Player.java                             (enum AX -> GUYBRUSH)
-src/infra/Actor.java                              (magic switch AX -> GUYBRUSH)
+src/infra/Actor.java                              (magic switch; draw order + corpse placement)
 src/infra/GoldenAxeGame.java                      (demo character)
 src/scene/SelectPlayer.java                       (select avatar)
 GoldenAxe.bat / run.ps1                           (double-click launcher)
 ReviewSprites.bat / BuildSprites.bat              (edit / bake the mapping)
+ReviewMount.bat                                   (place the riding pose on the beasts)
 tools/guybrush/guybrush_source.png                (source sheet)
 tools/guybrush/sprites.json                       (detected sprite catalog)
 tools/guybrush/mapping.json                       (editable animation -> sprite map)
+tools/guybrush/mount_placements.json              (the riding-pose placements)
 tools/guybrush/detect_sprites.py                  (rebuild sprites.json)
 tools/guybrush/init_mapping.py                    (reset mapping.json)
 tools/guybrush/make_reviewer.py                   (build reviewer.html)
 tools/guybrush/reviewer.html                      (visual mapper)
 tools/guybrush/serve_reviewer.py                  (local server: save in place)
+tools/guybrush/make_mount_editor.py               (build mount_editor.html)
+tools/guybrush/mount_editor.html                  (mount placement editor)
+tools/guybrush/serve_mount.py                     (serve both review pages)
+tools/guybrush/apply_mount.py                     (placements -> mapping + layout)
 tools/guybrush/deshare.py                         (de-share the frame layout)
 tools/guybrush/build_atlas.py                     (bake mapping.json -> game assets)
 tools/guybrush/patch_select.py                    (swap the select portrait)
@@ -160,16 +195,16 @@ HANDOFF.md / REVIEWER.md                          (technical docs)
 
 * Animations are **approximations**. The MI2 sheet is an adventure-game set
   (walking in 4 directions, gestures, lying poses) and has no Golden-Axe-style
-  axe swing, so attacks reuse point/punch/cutlass poses and several states
-  (mounting, thrown, resting) reuse a single stand-in pose.
+  axe swing, so attacks reuse point/punch/cutlass poses.
 * Guybrush is drawn slightly smaller than the original Ax art so the sprites fit
   inside the existing frame rectangles without clipping.
 * Colliders/points are inherited unchanged from Ax Battler, so reach and grab
   points are approximately where the original character had them.
-* **Mounting is a stand-in / test feature.** The sheet has no pose of Guybrush
-  riding a beast, so the mounted pose reuses walking frames and looks wrong. The
-  player's ability to mount is enabled for testing and can be toggled with **X**
-  at runtime.
+* **The riding pose is hand-placed, not authored.** The sheet has no pose of
+  Guybrush riding a beast either, so a lunging stance is positioned on each beast
+  by hand in the mount editor and mirrored on the beast frames that are drawn
+  mirrored. It reads as a rider, but it is still a stand-in for real riding art.
+  The player's ability to mount can be toggled with **X** at runtime.
 * Several special poses are single-frame in the original remake and therefore
   here too — `running_attack`, `jumping_attack`, `jumping_death_stab`,
   `stand_up`, `mounting`/`mounted_*`, `resting`, `dead`. They are held for a

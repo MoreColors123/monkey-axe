@@ -1,0 +1,47 @@
+{
+ "placements": {
+  "mounted_down": {
+   "pose": "s0443",
+   "scale": 1.25,
+   "dx": -31,
+   "dy": -33,
+   "mode": "bottom"
+  },
+  "mounted_down_flip": {
+   "pose": "s0004",
+   "scale": 1.15,
+   "dx": 1,
+   "dy": 1,
+   "mode": "bottom"
+  },
+  "mounted_side": {
+   "pose": "s0443",
+   "scale": 1.25,
+   "dx": -20,
+   "dy": -30,
+   "mode": "bottom"
+  },
+  "mounted_side_flip": {
+   "pose": "s0443",
+   "scale": 1.15,
+   "dx": -20,
+   "dy": -28,
+   "mode": "place",
+   "flip": true
+  },
+  "mounted_up": {
+   "pose": "s1131",
+   "scale": 1.15,
+   "dx": -30,
+   "dy": -23,
+   "mode": "bottom"
+  },
+  "mounted_up_flip": {
+   "pose": "s1126",
+   "scale": 1.05,
+   "dx": -20,
+   "dy": -19,
+   "mode": "bottom"
+  }
+ }
+}

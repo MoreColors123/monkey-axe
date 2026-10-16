@@ -40,8 +40,14 @@ sprite running RIGHT 2279 1342 42 57 23 54
 sprite running_attack RIGHT 1799 169 38 66 20 63
 sprite running_attack RIGHT 1116 436 45 57 22 55
 
-sprite jumping RIGHT 1319 1726 62 72 31 69
-sprite jumping RIGHT 1319 1908 61 61 30 58
+sprite jumping RIGHT 2520 0 72 90 36 88
+sprite jumping RIGHT 2594 0 72 90 36 88
+sprite jumping RIGHT 2668 0 72 90 36 88
+sprite jumping RIGHT 2742 0 72 90 36 88
+sprite jumping RIGHT 2816 0 72 90 36 88
+sprite jumping RIGHT 2890 0 72 90 36 88
+sprite jumping RIGHT 2964 0 72 90 36 88
+sprite jumping RIGHT 3038 0 72 90 36 88
 
 sprite jumping_attack RIGHT 1319 2079 77 71 30 68
 
@@ -169,24 +175,24 @@ sprite stand_up RIGHT 1799 345 45 40 22 37
 sprite mounting RIGHT 1559 1605 30 58 15 55
 sprite mounting RIGHT 2039 1922 32 59 16 56
 sprite mounting RIGHT 2039 2091 34 59 17 56
-sprite mounted_side RIGHT 1559 841 30 80 15 55
-sprite mounted_side RIGHT 2039 1540 32 81 16 56
-sprite mounted_side RIGHT 2039 1731 34 81 17 56
-sprite mounted_side_flip RIGHT 1559 1031 30 80 15 55
-sprite mounted_side_flip RIGHT 2039 1158 32 81 16 56
-sprite mounted_side_flip RIGHT 2039 1349 34 81 17 56
-sprite mounted_down RIGHT 1559 457 30 82 15 55
-sprite mounted_down RIGHT 2039 772 32 83 16 56
-sprite mounted_down RIGHT 2039 965 34 83 17 56
-sprite mounted_down_flip RIGHT 1559 649 30 82 15 55
-sprite mounted_down_flip RIGHT 2039 386 32 83 16 56
-sprite mounted_down_flip RIGHT 2039 579 34 83 17 56
-sprite mounted_up RIGHT 1559 1221 32 82 15 55
-sprite mounted_up RIGHT 2039 0 33 83 16 56
-sprite mounted_up RIGHT 2039 193 34 83 17 56
-sprite mounted_up_flip RIGHT 1559 1413 32 82 15 55
-sprite mounted_up_flip RIGHT 1799 1880 33 83 16 56
-sprite mounted_up_flip RIGHT 1799 2073 34 83 17 56
+sprite mounted_side RIGHT 1559 841 51 58 21 31
+sprite mounted_side RIGHT 2039 1540 51 58 21 31
+sprite mounted_side RIGHT 2039 1731 51 58 21 31
+sprite mounted_side_flip RIGHT 1559 1031 47 54 26 29
+sprite mounted_side_flip RIGHT 2039 1158 47 54 26 29
+sprite mounted_side_flip RIGHT 2039 1349 47 54 26 29
+sprite mounted_down RIGHT 1559 457 51 58 32 34
+sprite mounted_down RIGHT 2039 772 51 58 32 34
+sprite mounted_down RIGHT 2039 965 51 58 32 34
+sprite mounted_down_flip RIGHT 1559 649 31 57 1 1
+sprite mounted_down_flip RIGHT 2039 386 31 57 1 1
+sprite mounted_down_flip RIGHT 2039 579 31 57 1 1
+sprite mounted_up RIGHT 1559 1221 42 55 31 24
+sprite mounted_up RIGHT 2039 0 42 55 31 24
+sprite mounted_up RIGHT 2039 193 42 55 31 24
+sprite mounted_up_flip RIGHT 1559 1413 37 50 21 20
+sprite mounted_up_flip RIGHT 1799 1880 37 50 21 20
+sprite mounted_up_flip RIGHT 1799 2073 37 50 21 20
 
 parameter resting wakeup_delay_time 2000
 sprite resting RIGHT 1022 254 90 30 45 28
@@ -197,7 +203,6 @@ sprite magic RIGHT 658 1597 44 85 22 81
 parameter dying sound male_dead
 parameter dying animation_speed 0.5
 parameter dying animation_loop true
-sprite dying RIGHT 2416 396 63 54 31 32
 sprite dying RIGHT 1022 80 90 24 45 17
 
 sprite dead RIGHT 2416 0 89 22 44 16

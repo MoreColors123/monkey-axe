@@ -1,78 +1,65 @@
-# Golden Axe (remake)
+# Golden Axe — Guybrush Threepwood mod
 
-Golden Axe game implemented in java using only standard libraries (java 2D, AWT, Swing & Java Sound API), so no external libraries required.
+A playable Golden Axe remake in pure Java (Java2D/AWT/Swing/Java Sound, no
+external libraries), with **Guybrush Threepwood** from *Monkey Island 2: LeChuck's
+Revenge* as the first player character (the slot that used to be Ax Battler) — on
+the select screen, in stage, in the HUD and in the ending.
 
-## Win64 Executable / Runnable jar / Source code - v0.0.2 (java 16+)
+---
 
-<https://github.com/leonardo-ono/JavaGoldenAxe/releases/tag/v0.0.2>
+## ▶ Play now (Windows) — nothing to build
 
-## Building locally
+1. **Install Java 17** (Temurin JRE):
+   <https://adoptium.net/temurin/releases/?version=17>
+   pick *Operating System: Windows → Architecture: x64 → Package Type: JRE →
+   `.msi`*, run the installer (default options are fine).
+2. **Double-click `Play.bat`** in this folder.
 
-> **This fork (Guybrush Threepwood mod):** no Ant needed — double-click
-> **`GoldenAxe.bat`** in the repo root (or run `.\run.ps1`); it compiles with
-> `javac` and launches the game. The Ant steps below are the upstream original.
+That's the whole install — the game and all its art, music and sound are inside
+`GoldenAxe.jar`. (If `java` is already on your PATH, `java -jar GoldenAxe.jar`
+works from any OS.)
 
-1. Install JDK (Adoptium download link)
-1. Set JAVA_HOME = path/to/jdk
-1. Set PATH = PATH + JAVA_HOME/bin
-1. Install Ant (Apache Ant Download link)
-1. Set PATH = PATH + Ant_install_dir/bin
-1. Clone this repo (git clone path://to/this/repo)
-1. cd JavaGoldenAxeClone/JavaGoldenAxe
-1. ant
+> If Java isn't found, `Play.bat` opens the download page for you and waits.
 
-## Running locally (after build)
+## Controls
 
-```bash
-java -jar /path/to/this/repo/JavaGoldenAxe/dist/JavaGoldenAxe.jar
-```
+- Arrows — move · `O` attack · `P` jump · `I` magic
+- `F12` fullscreen · `F11` toggle aspect ratio
+- 2P: `WASD` move · `G` attack · `H` jump · `F` magic
 
-## Keyboard Controls
+## Cheats (hidden)
 
-[F12] key: full screen mode
+Type the word **`ape`** anywhere in-game to open the cheat menu (UP/DOWN to
+navigate, ENTER to toggle/activate, ESC to close):
 
-[F11] key: keep aspect ratio
+- **STAGE SELECT** — jump to any stage (type `1`–`9`, ENTER)
+- **MOUNT BEAST** — spawn a mountable beast beside you
+- **AUTO-KILL ENEMIES**, **NO THIEVES**, **INVINCIBLE PLAYER**
 
-[Arrow] keys: move player 1
+---
 
-[I] key: magic player 1
+## Building from source (developers)
 
-[O] key: attack player 1
+Needs a **JDK 17** (not just a JRE). No Ant required.
 
-[P] key: jump player 1
+- **`Play.bat`** — play (uses the committed `GoldenAxe.jar`).
+- **`GoldenAxe.bat`** — compile the sources and play (uses `run.ps1`; `.\run.ps1 -Rebuild` forces a recompile).
+- **`BuildRelease.bat`** — rebuild the shippable `GoldenAxe.jar` (game + assets).
+- **`BuildSprites.bat`** — re-bake the Guybrush sprites from `mapping.json`.
+- **`ReviewSprites.bat`** — open the sprite mapper (`reviewer.html`).
+- **`ViewAnimations.bat`** — open a playable move sandbox (`viewer.html`).
 
-[A, S, D, W] keys: move player 2
+The sprite tools also need **Python 3** with Pillow + numpy. See `HANDOFF.md`
+and `REVIEWER.md` for the full pipeline.
 
-[F] key: magic player 2
+---
 
-[G] key: attack player 2
+## Credits
 
-[H] key: jump player 2
-
-## Video
-
-[![video](http://img.youtube.com/vi/uevIVLNhQqs/0.jpg)](http://www.youtube.com/watch?v=uevIVLNhQqs)
-
-click the image above to see the gameplay video
-
-## Screenshots
-
-![](https://raw.githubusercontent.com/leonardo-ono/JavaGoldenAxe/master/screenshots/screenshot_1.png)
-
-![](https://raw.githubusercontent.com/leonardo-ono/JavaGoldenAxe/master/screenshots/screenshot_2.png)
-
-![](https://raw.githubusercontent.com/leonardo-ono/JavaGoldenAxe/master/screenshots/screenshot_3.png)
-
-![](https://raw.githubusercontent.com/leonardo-ono/JavaGoldenAxe/master/screenshots/screenshot_0.png)
-
-## References
-
-<https://goldenaxe.fandom.com/wiki/Main_Page>
-
-## Resources
-
-<https://www.spriters-resource.com/genesis_32x_scd/goldenaxe/>
-
-<https://www.spriters-resource.com/arcade/goldenaxe/>
-
-<https://spritedatabase.net/game/121>
+- Original Golden Axe remake by **Leonardo Ono** —
+  <https://github.com/leonardo-ono/JavaGoldenAxe>
+- Java GoldenAxe clone this fork is based on —
+  <https://github.com/derek-keeler/GoldenAxeClone>
+- Guybrush Threepwood sprites ripped from *Monkey Island 2* by **Ultimecia**
+  (spriters-resource) — keep the credit.
+- References: <https://goldenaxe.fandom.com/wiki/Main_Page>

@@ -43,44 +43,25 @@ public class GoldenAxeGame {
     // When true, the title screen never fires the attract intro (title.ani's
     // show_intro event is ignored), so you stay on the title until 1P START.
     // Set to false to restore the normal attract flow (intro cutscene + demo).
-    public static boolean SKIP_INTRO = true;
+    public static boolean SKIP_INTRO = false;
     // When true, every player state switch is printed to the console
     // (diagnosis aid; remove once done).
-    public static boolean DEBUG_STATE_SWITCH = true;
+    public static boolean DEBUG_STATE_SWITCH = false;
     // When true, the game boots straight into Stage 1 as Guybrush, in action
     // (no OL Presents / disclaimer / winners screens, no title, no select
     // screen, no intro). Set to false to restore the normal flow.
-    public static boolean TEST_BOOT_TO_GAME = true;
+    public static boolean TEST_BOOT_TO_GAME = false;
     // TEST: when true, every enemy dies 3s after it enters the stage, so you can
-    // traverse the whole level quickly. Toggle in-game with Y (see Stage).
+    // traverse the whole level quickly. Toggled from the cheat menu ("ape").
     public static boolean TEST_AUTO_KILL_ENEMIES = false;
-    // TEST: when true, the player can mount beasts. The mount art is a stand-in
-    // (walking frames), so this exists to test the mount mechanic. Toggle
-    // in-game with X (see Stage); false = player cannot mount.
-    public static boolean TEST_PLAYER_CAN_MOUNT = true;
-    // TEST: when true, thieves ("mana/food goblins") never spawn in any stage.
-    // Toggle in-game with G (see Stage); the switch survives stage changes.
+    // TEST: when true, thieves ("mana/food goblins") never spawn in any stage
+    // and existing ones are swept. Toggled from the cheat menu ("ape").
     public static boolean TEST_NO_THIEVES = false;
-    // TEST: boot into a stage-select prompt where you type the stage number.
-    public static boolean TEST_STAGE_SELECT = true;
+    // TEST: when true, the players cannot be hit. Toggled from the cheat menu.
+    public static boolean TEST_INVINCIBLE = false;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;
-    
-    // TEST/debug: append a line to mount_debug.log (in the working dir) so mount
-    // diagnostics can be inspected without reading the console.
-    public static void debugLog(String line) {
-        try {
-            java.nio.file.Files.writeString(
-                    java.nio.file.Path.of("mount_debug.log"),
-                    line + System.lineSeparator(),
-                    java.nio.file.StandardOpenOption.CREATE,
-                    java.nio.file.StandardOpenOption.APPEND);
-        }
-        catch (Exception e) {
-            // ignore
-        }
-    }
     
     
     public static void reset() {
@@ -109,6 +90,7 @@ public class GoldenAxeGame {
     // ---
     
     private final SceneManager sceneManager = new SceneManager();
+    private final CheatMenu cheatMenu = new CheatMenu(sceneManager);
     
     public void start() {
         Audio.start();
@@ -127,11 +109,13 @@ public class GoldenAxeGame {
         sceneManager.addState(new Ranking(sceneManager, this));
         sceneManager.startAll();
         
-        // TESTING: boot straight into the action (see TEST_BOOT_TO_GAME).
+        // TESTING: boot straight into Stage 1 as Guybrush (see
+        // TEST_BOOT_TO_GAME). The stage-select prompt is now reached from the
+        // cheat menu ("ape"); the normal boot is restored in the shipping pass.
         if (TEST_BOOT_TO_GAME) {
             numberOfPlayers = 1;
             characterPlayer1 = GUYBRUSH;
-            sceneManager.switchTo(TEST_STAGE_SELECT ? "stage_select" : "stage");
+            sceneManager.switchTo("stage");
         }
         else {
             sceneManager.switchTo("initializing");
@@ -147,11 +131,18 @@ public class GoldenAxeGame {
     }
     
     public void update(long delta) {
+        if (cheatMenu.isOpen()) {
+            return;
+        }
         sceneManager.update(delta);
     }
     
     public void fixedUpdate() {
         Audio.update();
+        cheatMenu.fixedUpdate();
+        if (cheatMenu.isOpen()) {
+            return;
+        }
         sceneManager.fixedUpdate();
     }
     
@@ -159,6 +150,7 @@ public class GoldenAxeGame {
         g.setBackground(Color.BLACK);
         g.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
         sceneManager.draw(g);
+        cheatMenu.draw(g);
     }
 
 }

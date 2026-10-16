@@ -65,7 +65,11 @@ Use these names when requesting changes.
   mappings with Approve/Dismiss/Reopen and a comment box (§6b). Open proposals
   come first, newest on top; a **closed** filter next to the section name hides
   handled ones (default hidden, remembered per browser).
-* **Animation settings** — name, `Reset section`, `mode`, per-animation `scale`.
+* **Animation settings** — name, `Reset section`, `mode` (`bottom`/`center`/
+  `place`), per-animation `scale`, and — in `place` mode — the `offset` fields
+  plus a `mirror` checkbox. Those three belong to the **mount art** and are set by
+  dragging on the beasts in `mount_editor.html` (see §11); editing them here is
+  equivalent, and `Export` writes the same `mapping.json` keys.
 * **Preview** — two animated canvases side by side, original (Ax) and new
   (Guybrush), plus play/replay/fps/loop and a meta line.
 * **Baked frames** — filmstrip of the frames that will actually bake.
@@ -82,11 +86,18 @@ Use these names when requesting changes.
 The page must show exactly what `build_atlas.py` will bake (see `HANDOFF.md` §5).
 
 * `buildPlan()` — one entry per raw rectangle `x,y,w,h`:
-  `{id, mode, scale, base, owner}`. **The first animation in layout order owns a
-  rectangle**; later animations reuse it. Then `mapping.rect_overrides` is applied.
+  `{id, mode, scale, base, offset, flip, owner}`. **The first animation in layout
+  order owns a rectangle**; later animations reuse it. Then
+  `mapping.rect_overrides` is applied (which may also override `offset`/`flip`).
+* `place` mode (the mount art, see `HANDOFF.md` §5.6): the scale is the mapping's
+  absolute `scale`, and the sprite is drawn at `anchor + offset`; `flip: true`
+  mirrors it *about the anchor* (`ctx.translate(ax,ay); ctx.scale(-1,1)`), exactly
+  like a `left`/`right` facing swap in the engine. `neededRect`, the filmstrip and
+  the animation preview all use this.
 * `drawPlanned(ctx, gf, ax, ay, idOverride)` — draws a planned frame. When
   `idOverride` is given (an "extra" frame) it recomputes the scale from that
-  sprite via `spriteScale()`.
+  sprite via `spriteScale()` and takes `offset`/`flip`/`mode` from the current
+  animation instead of the rectangle's owner.
 * `previewFrames(anim)` — the frame list the UI shows. Length is
   `max(layoutFrames, mappingFrames)`. Baked frames use the plan; frames beyond the
   layout are **extra** (drawn in orange, labelled `(extra)`, counter shows e.g.
@@ -207,10 +218,34 @@ regenerates `reviewer.html` with the new proposals) → approve/comment → Expo
 
 Working: named sections, original-vs-new preview, full mapped-frame preview
 (incl. extras), resizable splitter, rectangles bar + overrides, undo/redo,
-tooltips, Help popup, in-place save + backup, headless-testable.
+tooltips, Help popup, in-place save + backup, `place`/`flip` support for the mount
+art, headless-testable.
 
 Backlog for the reviewer and the mod lives in `HANDOFF.md` §14 ("Backlog / next
 steps"). Reviewer-specific ideas: atlas/layout visual preview with rectangle
 outlines, per-rectangle scale/mode editing in the bar, a conflict report of
 ignored per-animation choices, and animating the single-frame specials (needs
 layout frames — `HANDOFF.md` §10).
+
+---
+
+## 11. The mount editor (sibling page)
+
+`mount_editor.html` (`make_mount_editor.py` + `serve_mount.py`, launched by
+`ReviewMount.bat`) is the companion tool for the **riding pose**, which cannot be
+judged in the reviewer because it only makes sense drawn *on a beast*.
+
+* It embeds the beast sheets (`dragon_blue`, `dragon_red`, `chicken_leg`), their
+  `.char` frames and every frame that carries a `mounted_*` point, plus the rider
+  layout rectangles and a strip of candidate poses.
+* For each beast frame it draws the beast (mirrored when the sheet is authored
+  `LEFT`, which the dragons are) with the mount point marked, then the rider at
+  that point using the same `place`/`flip` maths as the baker.
+* Drag = move, wheel = scale, click a thumbnail = swap the pose, `⇄ mirror` =
+  `flip`. Placement is **per rider animation** and shared across every beast and
+  frame. **Save** posts `mount_placements.json` via `/api/mount`.
+* `apply_mount.py` turns those placements into `mapping.json` entries *and* resizes
+  the mount rectangles to fit; then `build_atlas.py` bakes. See `HANDOFF.md` §6b.
+
+The reviewer and the mount editor must not disagree: both implement `place` mode
+identically, and `apply_mount.py` writes exactly the keys the reviewer shows.

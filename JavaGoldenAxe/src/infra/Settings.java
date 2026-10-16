@@ -99,13 +99,6 @@ public class Settings {
     public static int KEY_PLAYER_2_ATTACK = KeyEvent.VK_G;
     public static int KEY_PLAYER_2_JUMP = KeyEvent.VK_H;
     
-    // TEST/debug: toggle "every enemy dies 3s after spawning" (see Stage).
-    public static int KEY_TEST_AUTO_KILL_ENEMIES = KeyEvent.VK_Y;
-    // TEST/debug: toggle whether the player can mount beasts (see Stage).
-    public static int KEY_TEST_PLAYER_CAN_MOUNT = KeyEvent.VK_X;
-    // TEST/debug: toggle the mana/food "goblins" (thieves) off/on (see Stage).
-    public static int KEY_TEST_NO_THIEVES = KeyEvent.VK_G;
-    
     // --- life ---
     
     public static int CREDITS = 20;

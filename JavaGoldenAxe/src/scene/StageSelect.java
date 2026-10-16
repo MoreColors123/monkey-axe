@@ -10,9 +10,9 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 
 /**
- * TEST: stage-select prompt shown at boot. Type a stage number (1-9) and press
- * ENTER to jump straight to that stage as Guybrush. Enabled by
- * GoldenAxeGame.TEST_STAGE_SELECT.
+ * Stage-select prompt. Type a stage number (1-9) and press ENTER to jump
+ * straight to that stage as Guybrush. Reached from the hidden cheat menu
+ * ("ape" -> STAGE SELECT); it is no longer a boot mode.
  */
 public class StageSelect extends State<GoldenAxeGame, SceneManager> {
 

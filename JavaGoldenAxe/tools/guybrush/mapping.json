@@ -40,29 +40,26 @@
   "running_attack": {
    "mode": "bottom",
    "frames": [
-    "s0321",
-    "s0320",
-    "s0321"
+    "s0361"
    ]
   },
   "jumping": {
    "mode": "bottom",
    "frames": [
-    "s0333",
-    "s0327",
-    "s0333"
+    "s0250",
+    "s0257"
    ]
   },
   "jumping_attack": {
    "mode": "bottom",
    "frames": [
-    "s0354"
+    "s0333"
    ]
   },
   "jumping_death_stab": {
    "mode": "bottom",
    "frames": [
-    "s0333"
+    "s0250"
    ]
   },
   "attack_1": {
@@ -158,6 +155,7 @@
   },
   "thrown": {
    "mode": "center",
+   "flip": true,
    "frames": [
     "s0312",
     "s0208"
@@ -165,6 +163,7 @@
   },
   "stunned_1": {
    "mode": "bottom",
+   "flip": true,
    "frames": [
     "s1090",
     "s1092",
@@ -176,6 +175,7 @@
   },
   "stunned_2": {
    "mode": "bottom",
+   "flip": true,
    "frames": [
     "s0938",
     "s0937"
@@ -183,9 +183,10 @@
   },
   "knock_down": {
    "mode": "center",
+   "flip": true,
    "frames": [
-    "s0207",
-    "s0208"
+    "s0445",
+    "s0450"
    ]
   },
   "stand_up": {
@@ -203,75 +204,95 @@
    ]
   },
   "mounted_side": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s0443"
+   ],
+   "scale": 1.25,
+   "offset": [
+    -20,
+    -30
    ]
   },
   "mounted_side_flip": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
-   ]
+    "s0443"
+   ],
+   "scale": 1.15,
+   "offset": [
+    -20,
+    -28
+   ],
+   "flip": true
   },
   "mounted_down": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s0443"
+   ],
+   "scale": 1.25,
+   "offset": [
+    -31,
+    -33
    ]
   },
   "mounted_down_flip": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s0004"
+   ],
+   "scale": 1.15,
+   "offset": [
+    1,
+    1
    ]
   },
   "mounted_up": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s1131"
+   ],
+   "scale": 1.15,
+   "offset": [
+    -30,
+    -23
    ]
   },
   "mounted_up_flip": {
-   "mode": "bottom",
+   "mode": "place",
    "frames": [
-    "s0004",
-    "s0008",
-    "s0006"
+    "s1126"
+   ],
+   "scale": 1.05,
+   "offset": [
+    -20,
+    -19
    ]
   },
   "resting": {
    "mode": "center",
    "frames": [
-    "s0450"
+    "s0451"
    ]
   },
   "magic": {
    "mode": "bottom",
    "frames": [
-    "s1142",
-    "s1145"
+    "s1145",
+    "s1143"
    ]
   },
   "dying": {
    "mode": "center",
+   "flip": true,
    "frames": [
-    "s0207",
     "s0208"
    ]
   },
   "dead": {
    "mode": "center",
+   "flip": true,
    "frames": [
     "s0208"
    ]

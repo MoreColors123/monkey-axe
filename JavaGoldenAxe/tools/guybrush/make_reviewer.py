@@ -244,11 +244,16 @@ TEMPLATE = r"""<!doctype html>
       <div class="row">
         <b id="animname"></b>
         <button id="resetsection" title="Restore this section to the last exported state">Reset section</button>
-        <label title="bottom = feet stand on the frame's anchor (cy); center = art is fitted and centred, ignoring the anchor.">mode
-          <select id="mode"><option value="bottom">bottom</option><option value="center">center</option></select>
+        <label title="bottom = feet stand on the frame's anchor (cy); center = art is fitted and centred, ignoring the anchor; place = use the offset/mirror set by mount_editor.html (mount animations).">mode
+          <select id="mode"><option value="bottom">bottom</option><option value="center">center</option><option value="place">place</option></select>
         </label>
         <label title="Optional size multiplier for THIS animation only. Blank = use the global scale.">scale
           <input id="ascale" type="number" step="0.05" placeholder="global" style="width:80px">
+        </label>
+        <label id="placefields" title="place mode: where the sprite's top-left sits relative to the frame anchor, in atlas pixels. Set these by dragging in mount_editor.html.">offset
+          <input id="aoffx" type="number" step="1" style="width:60px">,
+          <input id="aoffy" type="number" step="1" style="width:60px">
+          <label title="mirror the pose about the anchor (the *_flip animations)"><input id="aflip" type="checkbox"> mirror</label>
         </label>
       </div>
       <div class="sechead">Preview</div>
@@ -547,6 +552,8 @@ function buildPlan(){
     const ids = (e.frames && e.frames.length) ? e.frames : entry('idle').frames;
     const mode = e.mode || 'bottom';
     const base = baseOf(e);
+    const offset = e.offset || null;
+    const flip = !!e.flip;
     const gfs = DATA.ga[a] || [];
     const distinct = [], seen = new Set();
     for (const gf of gfs){ const k = rectKey(gf); if (!seen.has(k)){ seen.add(k); distinct.push(gf); } }
@@ -568,9 +575,10 @@ function buildPlan(){
       const k = rectKey(gf);
       if (plan[k]) return;
       const sp = S[assign[k]]; if (!sp) return;
-      const sc = (mode === 'center') ? Math.min(base, gf.h/sp.h, gf.w/sp.w) : uniform;
+      const sc = (mode === 'center') ? Math.min(base, gf.h/sp.h, gf.w/sp.w)
+               : (mode === 'place') ? base : uniform;
       plan[k] = {id: assign[k], mode: mode, scale: Math.max(sc == null ? 0.1 : sc, 0.1),
-                 base: base, owner: a};
+                 base: base, offset: offset, flip: flip, owner: a};
     });
   }
   const ov = mapping.rect_overrides || {};
@@ -582,11 +590,14 @@ function buildPlan(){
       if (o.id) p.id = o.id;
       if (o.mode) p.mode = o.mode;
       if (o.scale != null) p.scale = o.scale;
+      if (o.offset) p.offset = o.offset;
+      if (o.flip != null) p.flip = o.flip;
     }
   }
   return plan;
 }
 function spriteScale(sp, gf, mode, base){
+  if (mode === 'place') return base;
   if (mode === 'center' || gf.cy <= 0) return Math.min(base, gf.h/sp.h, gf.w/sp.w);
   return Math.min(base, gf.cy/sp.h);
 }
@@ -600,7 +611,14 @@ function drawPlanned(ctx, gf, ax, ay, idOverride){
   const s = idOverride
     ? Math.max(spriteScale(sp, gf, p.mode, p.base || p.scale), 0.1)
     : p.scale;
-  drawFrameSprite(ctx, sp, gf, p.mode, p.base || p.scale, ax, ay, s);
+  // "place" animations (the mount editor's drag results) carry their own offset
+  // relative to the anchor and an optional mirror; extra frames use the current
+  // animation's own placement, baked frames use the rectangle owner's.
+  const e = idOverride ? entry(selAnim) : null;
+  const off = idOverride ? (e.offset || null) : (p.offset || null);
+  const flip = idOverride ? !!e.flip : !!p.flip;
+  const mode = idOverride ? (e.mode || 'bottom') : p.mode;
+  drawFrameSprite(ctx, sp, gf, mode, p.base || p.scale, ax, ay, s, off, flip);
 }
 // Frames the preview/filmstrip should show. The game layout may have fewer
 // frames than the animation's frame list, so show every mapped frame: baked
@@ -839,19 +857,40 @@ function renderRects(){
     cnt.textContent = `${all.length} total` + (shared ? `, ${shared} shared` : ', none shared');
   }
 }
-function drawFrameSprite(ctx, sp, gf, mode, base, ax, ay, sOverride){
+function drawFrameSprite(ctx, sp, gf, mode, base, ax, ay, sOverride, off, flip){
   if (!imgSource || !sp) return; // sheet may not have loaded yet
   // mirrors build_atlas.fit_scale: "center" fits the frame, "bottom" keeps a
-  // constant size and clips wide poses instead of shrinking the character.
+  // constant size and clips wide poses instead of shrinking the character, and
+  // "place" takes the mount editor's offset/scale verbatim.
   let s;
   if (sOverride != null) s = sOverride;
+  else if (mode==='place') s = base;
   else if (mode==='center' || gf.cy<=0) s = Math.min(base, gf.h/sp.h, gf.w/sp.w);
   else s = Math.min(base, gf.cy/sp.h);
   s = Math.max(s, 0.1);
   const nw = Math.max(1, Math.round(sp.w*s)), nh = Math.max(1, Math.round(sp.h*s));
+  if (mode==='place' && off){
+    if (flip){
+      // mirror about the anchor, exactly like build_atlas.py does
+      ctx.save(); ctx.translate(ax, ay); ctx.scale(-1,1);
+      ctx.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h, off[0], off[1], nw, nh);
+      ctx.restore();
+    } else {
+      ctx.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h,
+                    ax+off[0], ay+off[1], nw, nh);
+    }
+    return;
+  }
   const dx = ax - Math.floor(nw/2);
   const dy = mode==='center' ? ay - gf.cy + Math.floor((gf.h-nh)/2) : ay - nh;
-  ctx.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h, dx, dy, nw, nh);
+  if (flip){
+    // mirror about the anchor, exactly like build_atlas.py's per-animation flip
+    ctx.save(); ctx.translate(ax, ay); ctx.scale(-1,1);
+    ctx.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h, dx-ax, dy-ay, nw, nh);
+    ctx.restore();
+  } else {
+    ctx.drawImage(imgSource, sp.x, sp.y, sp.w, sp.h, dx, dy, nw, nh);
+  }
 }
 
 const film = document.getElementById('film');
@@ -992,9 +1031,15 @@ function tick(now){
 
 function refresh(){
   document.getElementById('animname').textContent = selAnim;
-  document.getElementById('mode').value = entry(selAnim).mode || 'bottom';
   const e = entry(selAnim);
+  document.getElementById('mode').value = e.mode || 'bottom';
   document.getElementById('ascale').value = e.scale || '';
+  const off = e.offset || [];
+  document.getElementById('aoffx').value = (off[0] != null) ? off[0] : '';
+  document.getElementById('aoffy').value = (off[1] != null) ? off[1] : '';
+  document.getElementById('aflip').checked = !!e.flip;
+  document.getElementById('placefields').style.display =
+    (e.mode === 'place') ? '' : 'none';
   const loop = DATA.loop[selAnim] === true;
   document.getElementById('animmeta').textContent =
     `speed ${(DATA.speed[selAnim]!=null?DATA.speed[selAnim]:0.1)} = ${Math.round(realFps(selAnim)*10)/10} fps - ${loop?'loops':'plays once'}`;
@@ -1025,6 +1070,26 @@ document.getElementById('ascale').onchange = e => {
   const v = parseFloat(e.target.value);
   pushHistory();
   if (isNaN(v)) delete entry(selAnim).scale; else entry(selAnim).scale = v;
+  refresh();
+};
+function writeOffset(){
+  const x = document.getElementById('aoffx').value;
+  const y = document.getElementById('aoffy').value;
+  pushHistory();
+  const en = entry(selAnim);
+  if (x === '' || y === '' || isNaN(parseFloat(x)) || isNaN(parseFloat(y))){
+    delete en.offset; en.mode = 'bottom';
+  } else {
+    en.mode = 'place';
+    en.offset = [Math.round(parseFloat(x)), Math.round(parseFloat(y))];
+  }
+  refresh();
+}
+document.getElementById('aoffx').onchange = writeOffset;
+document.getElementById('aoffy').onchange = writeOffset;
+document.getElementById('aflip').onchange = e => {
+  pushHistory();
+  if (e.target.checked) entry(selAnim).flip = true; else delete entry(selAnim).flip;
   refresh();
 };
 document.getElementById('append').onclick = () => { if (selected){ pushHistory(); entry(selAnim).frames.push(selected.id); refresh(); } };

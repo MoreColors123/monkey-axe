@@ -59,6 +59,10 @@ def fit_scale(spr_w, spr_h, w, h, cx, cy, mode, base):
     # above the anchor, never by width - a wide pose just clips at the frame
     # edge instead of shrinking the whole body).
     # "center": fit inside the frame (used for lying poses).
+    # "place": the size is whatever the mapping says; the position comes from
+    # the placement's own offset (mount_editor.html drag results).
+    if mode == "place":
+        return base
     if mode == "center" or cy <= 0:
         s = min(base, h / spr_h, w / spr_w)
     else:
@@ -125,6 +129,10 @@ def main():
         ids = entry.get("frames") or animations["idle"]["frames"]
         mode = entry.get("mode", "bottom")
         base = entry.get("scale", global_scale)
+        offset = entry.get("offset")           # [dx, dy] relative to the anchor
+        flip = bool(entry.get("flip", False))  # mirror the pose about the anchor
+        if mode == "place" and offset is None:
+            mode = "bottom"
 
         distinct = []
         seen = set()
@@ -160,7 +168,8 @@ def main():
             else:
                 sc = uniform
             plan[key] = {"rect": (x, y, w, h, cx, cy), "id": sp_id,
-                         "mode": mode, "scale": sc, "owner": anim}
+                         "mode": mode, "scale": sc, "owner": anim,
+                         "offset": offset, "flip": flip}
 
     for anim in order:
         if anim not in ("none", "logo"):
@@ -188,11 +197,18 @@ def main():
     for p in plan.values():
         x, y, w, h, cx, cy = p["rect"]
         spr = tile(sprites[p["id"]])
+        if p.get("flip"):
+            spr = spr.transpose(Image.FLIP_LEFT_RIGHT)
         s = p["scale"]
         nw, nh = max(1, round(spr.width * s)), max(1, round(spr.height * s))
         scaled = spr.resize((nw, nh), Image.NEAREST)
         if p["mode"] == "center":
             px, py = x + cx - nw // 2, y + (h - nh) // 2
+        elif p["mode"] == "place":
+            dx, dy = p["offset"]
+            if p.get("flip"):
+                dx = -(dx + nw)      # keep the anchor, mirror the placement
+            px, py = x + cx + dx, y + cy + dy
         else:
             px, py = x + cx - nw // 2, y + cy - nh
         layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))

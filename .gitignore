@@ -12,6 +12,8 @@
 
 # Package Files #
 *.jar
+# ...but the shipped game jar is committed on purpose (double-click Play.bat)
+!GoldenAxe.jar
 *.war
 *.nar
 *.ear
@@ -28,6 +30,8 @@ dist/
 
 # local no-Ant build output (created by run.ps1)
 build-custom/
+# release build scratch (make_release.ps1)
+build-release/
 
 # generated sprite detection preview
 JavaGoldenAxe/tools/guybrush/sprites_overview.png
@@ -38,5 +42,6 @@ JavaGoldenAxe/tools/guybrush/sprites_overview.png
 # reviewer export backup + temp file (written next to mapping.json)
 JavaGoldenAxe/tools/guybrush/mapping.backup.json
 JavaGoldenAxe/tools/guybrush/mapping.json.tmp
+JavaGoldenAxe/tools/guybrush/sprites.backup.json
 JavaGoldenAxe/tools/guybrush/__pycache__/
 

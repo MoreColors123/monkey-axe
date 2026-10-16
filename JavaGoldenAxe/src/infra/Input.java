@@ -23,6 +23,24 @@ public class Input implements KeyListener {
     private static final long DOUBLE_PRESSED_TIME = 250;
     private static final Map<Integer, long[]> KEYS_DOUBLE_PRESSED 
                                                             = new HashMap<>();
+    
+    // Rolling buffer of the printable characters typed so far. Used by the
+    // hidden cheat menu, which opens when the player types a magic word.
+    private static final StringBuilder TYPED_KEYS = new StringBuilder();
+    private static final int TYPED_KEYS_MAX = 32;
+
+    // True if the most recently typed characters end with the given sequence.
+    public static synchronized boolean typedKeysEndWith(String sequence) {
+        int n = sequence.length();
+        if (TYPED_KEYS.length() < n) {
+            return false;
+        }
+        return TYPED_KEYS.substring(TYPED_KEYS.length() - n).equals(sequence);
+    }
+
+    public static synchronized void clearTypedKeys() {
+        TYPED_KEYS.setLength(0);
+    }
 
     public static void addListener(KeyListener listener) {
         Input.LISTENERS.add(listener);
@@ -64,6 +82,13 @@ public class Input implements KeyListener {
     
     @Override
     public synchronized void keyTyped(KeyEvent e) {
+        char c = e.getKeyChar();
+        if (Character.isLetterOrDigit(c)) {
+            TYPED_KEYS.append(Character.toLowerCase(c));
+            if (TYPED_KEYS.length() > TYPED_KEYS_MAX) {
+                TYPED_KEYS.deleteCharAt(0);
+            }
+        }
         if (LISTENERS != null) {
             LISTENERS.forEach(action -> action.keyTyped(e));
         }
