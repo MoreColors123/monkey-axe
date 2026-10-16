@@ -103,6 +103,8 @@ public class Settings {
     public static int KEY_TEST_AUTO_KILL_ENEMIES = KeyEvent.VK_Y;
     // TEST/debug: toggle whether the player can mount beasts (see Stage).
     public static int KEY_TEST_PLAYER_CAN_MOUNT = KeyEvent.VK_X;
+    // TEST/debug: toggle the mana/food "goblins" (thieves) off/on (see Stage).
+    public static int KEY_TEST_NO_THIEVES = KeyEvent.VK_G;
     
     // --- life ---
     

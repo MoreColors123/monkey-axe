@@ -3,6 +3,7 @@ package scene;
 import actor.Decoration;
 import actor.Enemy;
 import actor.Player;
+import actor.Thief;
 import static actor.Player.PlayerCharacter.GILIUS;
 import infra.Actor;
 import static infra.Actor.Control.*;
@@ -75,6 +76,8 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
     private long gameStartableBlinkStartTime;
     private long demoEndTime;
     private Actor boss;
+    // TEST/debug: throttle for the beast-mount diagnostic scan.
+    private long mountDebugLast;
     
     public Stage(SceneManager manager, GoldenAxeGame game) {
         super(manager, "stage", game);
@@ -274,15 +277,90 @@ public class Stage extends State<GoldenAxeGame, SceneManager> {
             System.out.println("[test] player can mount = "
                     + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT);
         }
+        // TEST: press G to turn the mana/food "goblins" (thieves) off/on.
+        if (Input.isKeyJustPressed(KEY_TEST_NO_THIEVES)) {
+            GoldenAxeGame.TEST_NO_THIEVES = !GoldenAxeGame.TEST_NO_THIEVES;
+            System.out.println("[test] no thieves = "
+                    + GoldenAxeGame.TEST_NO_THIEVES);
+            if (GoldenAxeGame.TEST_NO_THIEVES) {
+                for (Actor actor : actors) {
+                    if (actor instanceof Thief) {
+                        actor.destroy();
+                    }
+                }
+            }
+        }
         if (GoldenAxeGame.TEST_AUTO_KILL_ENEMIES) {
             long now = Util.getTime();
             for (Actor actor : actors) {
-                if (actor instanceof Enemy enemy && enemy.isAlive()
+                if (actor instanceof Enemy enemy && !enemy.isMountable()
+                        && enemy.isAlive()
                         && now - enemy.spawnTime >= TEST_ENEMY_KILL_DELAY_MS) {
                     String stateName = enemy.getStateManager()
                             .getCurrentState().getName();
                     if (!stateName.equals("dying") && !stateName.equals("dead")) {
                         enemy.forceKill();
+                    }
+                }
+            }
+        }
+        // TEST/debug: log beast mount diagnostics every 500ms to mount_debug.log.
+        if (Util.getTime() - mountDebugLast >= 500) {
+            mountDebugLast = Util.getTime();
+            Actor dbgPlayer = GoldenAxeGame.player1 != null
+                    ? GoldenAxeGame.player1 : GoldenAxeGame.player2;
+            if (dbgPlayer != null) {
+                String dbgAnim = "-";
+                if (dbgPlayer.getAnimationPlayer() != null
+                        && dbgPlayer.getAnimationPlayer()
+                                .getCurrentAnimation() != null) {
+                    dbgAnim = dbgPlayer.getAnimationPlayer()
+                            .getCurrentAnimation().getName();
+                }
+                GoldenAxeGame.debugLog("[player] state="
+                        + dbgPlayer.getStateManager().getCurrentState().getName()
+                        + " anim=" + dbgAnim
+                        + " alive=" + dbgPlayer.isAlive()
+                        + " destroyed=" + dbgPlayer.isDestroyed()
+                        + " wx=" + Math.round(dbgPlayer.getWx())
+                        + " wz=" + Math.round(dbgPlayer.getWz())
+                        + " wy=" + Math.round(dbgPlayer.getWy())
+                        + " energy=" + dbgPlayer.getEnergy()
+                        + " flag=" + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT
+                        + " kill=" + GoldenAxeGame.TEST_AUTO_KILL_ENEMIES);
+                for (Actor dbgActor : actors) {
+                    if (dbgActor instanceof Enemy dbgBeast
+                                            && dbgBeast.isMountable()) {
+                        Animation dbgBeastAnim
+                                = dbgBeast.getAnimationPlayer() != null
+                                    ? dbgBeast.getAnimationPlayer()
+                                            .getCurrentAnimation() : null;
+                        boolean hasMountCollider = false;
+                        if (dbgBeastAnim != null) {
+                            for (Collider c 
+                                    : dbgBeast.getCurrentFrameColliders()) {
+                                if (c.getType() == Collider.Type.TOUCH
+                                    && c.getReaction()
+                                            == Collider.Reaction.MOUNT) {
+                                    hasMountCollider = true;
+                                }
+                            }
+                        }
+                        GoldenAxeGame.debugLog("[scan] beast=" + dbgBeast.getId()
+                            + " state=" + dbgBeast.getStateManager()
+                                    .getCurrentState().getName()
+                            + " anim=" + (dbgBeastAnim != null
+                                    ? dbgBeastAnim.getName() : "null")
+                            + " mountCollider=" + hasMountCollider
+                            + " reacted=" + (dbgBeastAnim != null
+                                    && dbgBeastAnim.isActorReacted(dbgPlayer))
+                            + " dWx=" + Math.round(Math.abs(
+                                    dbgBeast.getWx() - dbgPlayer.getWx()))
+                            + " dWz=" + Math.round(Math.abs(
+                                    dbgBeast.getWz() - dbgPlayer.getWz()))
+                            + " pState=" + dbgPlayer.getStateManager()
+                                    .getCurrentState().getName()
+                            + " flag=" + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT);
                     }
                 }
             }

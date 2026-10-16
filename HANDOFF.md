@@ -9,6 +9,67 @@ before touching anything.
 
 ---
 
+## 0. Current status & open bug (READ FIRST)
+
+The mod is a **playable Guybrush mod of the early stages, with test tooling**
+(§2). Recently landed and working:
+
+* **Player mounting works.** A riderless beast can be mounted by the player or
+  by an enemy (as in the original). With the **Y** cheat you kill the rider and
+  the beast is **released back to `resting`** (mountable), so you can then ride
+  it. Mount art is still the walking-frame stand-in (§10).
+* **Boot stage-select** (`TEST_STAGE_SELECT`): at startup you type `1`–`9` and
+  press ENTER to start directly in that stage (`scene/StageSelect.java`).
+* **G disables the mana/food goblins** (thieves) for the whole run, across all
+  stages (`TEST_NO_THIEVES`).
+
+### Open bug: crash/freeze while riding a dragon (Stage 3)
+
+**Symptom (user):** riding a dragon, alone on screen, shortly after killing the
+first enemy, the game froze. Stack trace:
+
+```
+Exception in thread "Thread-0" java.lang.NullPointerException: Cannot invoke
+"infra.Animation.getCurrentFrame()" because the return value of
+"infra.AnimationPlayer.getCurrentAnimation()" is null
+    at infra.Actor.getCurrentFrameColliders(Actor.java:1072)
+    at scene.Stage.fixedUpdate(Stage.java:335)
+    at infra.SceneManager.fixedUpdate(SceneManager.java:77)
+    at infra.GoldenAxeGame.fixedUpdate(GoldenAxeGame.java:155)
+    at infra.GameCanvas$MainLoop.run(GameCanvas.java:92)
+```
+
+**Cause found:** `Stage.java:335` was the *temporary mount-diagnostic scan*
+(added to debug mounting, see below). It called `Actor.getCurrentFrameColliders()`
+on every mountable beast **without the null-animation guard** that the real
+collision code (`Stage.checkCollisions`) uses, so a beast whose actor briefly
+had no current animation crashed the loop.
+
+**Status — both call sites are now null-safe:**
+* `Actor.getCurrentFrameColliders()` returns an empty list when there is no
+  current animation.
+* the diagnostic scan skips the collider / `isActorReacted` derefs when the
+  animation is null, and logs `anim=null` instead.
+
+**To verify / finish in the next session:** run Stage 3, ride a dragon, kill the
+first enemy — it should no longer crash. If a freeze *still* happens, the real
+question is **"why does a mountable actor momentarily have no current
+animation?"** — check `mount_debug.log` (see below) for an `anim=null` line and
+chase that state-machine gap (likely a beast mid state-switch, e.g. right after
+`unmount()`/`resting`/`runaway` or while a rider is being placed).
+
+### Temporary diagnostics — remove before shipping
+
+`GoldenAxeGame.debugLog(...)` appends to **`mount_debug.log`** in the game's
+working dir (repo root when launched via `GoldenAxe.bat`). It logs, every 500 ms,
+the player's state/anim/position and every mountable beast's
+state/anim/colliders, plus every reaction the player takes. Added to debug
+mounting. Remove these three when the mount work is signed off:
+`Actor.react` player-reaction log, the `Stage.fixedUpdate` scan, and
+`GoldenAxeGame.debugLog`.
+
+---
+
 ## 1. Goal
 
 Replace **Ax Battler** in the Java Golden Axe remake (codebase:
@@ -46,22 +107,27 @@ Launchers (double-click, all in the repo root):
 > it as an agent step. (Same for `ReviewSprites.bat` — don't drive the browser.)
 
 Testing toggles (in `src/infra/GoldenAxeGame.java`):
-* `TEST_BOOT_TO_GAME = true` — boots straight into Stage 1 as Guybrush in the
-  arena (skips OL Presents / disclaimer / winners / title / select / intro);
-  set `false` to restore the normal flow.
+* `TEST_BOOT_TO_GAME = true` — boots into the game as Guybrush (skips OL
+  Presents / disclaimer / winners / title / select / intro); set `false` to
+  restore the normal flow.
+* `TEST_STAGE_SELECT = true` — with `TEST_BOOT_TO_GAME`, boot into the
+  **stage-select prompt** (`scene/StageSelect.java`): type `1`–`9` and press
+  ENTER to start directly in that stage. `false` = boot straight to Stage 1.
 * `SKIP_INTRO = true` — the title never fires the attract intro (`title.ani`'s
   show_intro event), so no intro cutscene/demo; set `false` to restore.
 * `DEBUG_STATE_SWITCH` — prints state/animation switches to the console
   (`[state]` deduplicated to real changes; `[anim]` on animation change).
   Temporary diagnosis aid; remove once done.
-* **`Y` (in-game)** toggles the enemy auto-kill cheat: every enemy dies 3s
-  after it spawns (`TEST_AUTO_KILL_ENEMIES` in `GoldenAxeGame`, off by default;
-  `Stage` reads `Actor.spawnTime` and calls `Actor.forceKill()`). Use it to walk
-  the whole level without fighting each wave. `KEY_TEST_AUTO_KILL_ENEMIES` in
-  `Settings`.
-* **`X` (in-game)** toggles whether the player can mount beasts
-  (`TEST_PLAYER_CAN_MOUNT`, default **on** for mount testing; see §10). Off = the
-  player cannot mount. `KEY_TEST_PLAYER_CAN_MOUNT` in `Settings`.
+* **`Y` (in-game)** — enemy auto-kill cheat (`TEST_AUTO_KILL_ENEMIES`, default
+  off). Every enemy dies 3s after spawn; **beasts are skipped** so mounts
+  survive, and killing a **mounted** rider calls `unmount()` so the beast drops
+  to `resting` (mountable). `KEY_TEST_AUTO_KILL_ENEMIES` / `Actor.forceKill`.
+* **`X` (in-game)** — player mount switch (`TEST_PLAYER_CAN_MOUNT`, default
+  **on**). Off = the player cannot mount; enemies can still mount (see §10).
+* **`G` (in-game)** — goblin switch (`TEST_NO_THIEVES`, default off). On = the
+  mana/food **thieves never spawn** in any stage and existing ones are removed
+  (`Command` SPAWN skips `Thief` and releases its camera lock). Global, survives
+  stage changes. `KEY_TEST_NO_THIEVES`.
 * Stage 1's walk-in + opening dialogue are skipped in
   `assets/res/stage/stage_1.inf` (players spawn in `walking` at the arena; the
   original lines are commented right there — swap to restore).
@@ -106,9 +172,8 @@ Read `src/infra/Resource.java` + `src/infra/Animation.java` + `src/infra/Sprite.
   `attack_1..7`, `attack_special`, `attack_special_return`, `attack_short`,
   `grab_and_throw`, `thrown`, `stunned_1/2`, `knock_down`, `stand_up`,
   `mounting`, `mounted_*`, `resting`, `magic`, `dying`, `dead`.
-  The `mounting`/`mounted_*` art is a stand-in (walking frames); the player's
-  ability to mount is gated by the **X** test toggle (see §10). When off,
-  Guybrush cannot mount but the beasts are otherwise unchanged.
+  The `mounting`/`mounted_*` art is a stand-in (walking frames). Mounting works
+  (see §10); the **X** toggle gates only the player — enemies mount as normal.
   `walking_side` = NEW (mod): profile side-walk for horizontal movement, added
    by an approved engine patch in `Actor.Walking` (plays it when the character
    provides it, else the original walking_down/up behaviour). 8 frames drawn
@@ -377,15 +442,16 @@ A red error banner appears at the top if the page throws.
   that a sharing animation may show the owner's pose. Use `rect_overrides` in
   `mapping.json` to force a rectangle's sprite/size/mode. The reviewer lists any
   frames that come from shared rectangles owned by another animation.
-* **Player mounting is a test toggle.** The MI2 sheet has no riding pose, so
-  `mounting`/`mounted_*` use walking-frame stand-ins (which is why it looked
-  wrong). It is restored and enabled by default so the mount mechanic can be
-  tested, and gated by `TEST_PLAYER_CAN_MOUNT`, toggled in-game with **X**
-  (`Actor.react` MOUNT case checks the flag for player-controlled riders; state
-  availability still requires the `mounting` animation). The beasts
-  (`chicken_leg`, `dragon_blue/red`) spawn, carry enemy riders and work as
-  normal; scripted `MOUNT` commands only target enemies. A proper seated pose
-  set would make this real (see the ideas below).
+* **Mounting works; the riding pose is a stand-in.** The MI2 sheet has no riding
+  pose, so `mounting`/`mounted_*` use walking-frame stand-ins (that is why
+  Guybrush looks like he strides in place while mounted). Mechanic: a riderless
+  beast (its `TOUCH MOUNT` collider lives on its **`resting`** frame) is mounted
+  by whoever walks into it — player **or** enemy. `Actor.react`'s MOUNT case
+  gates only the player with `TEST_PLAYER_CAN_MOUNT` (**X**); enemies always can.
+  Killing a mounted rider with **Y** makes `Actor.forceKill()` call the beast's
+  `unmount()`, dropping it back to `resting` (mountable). `Actor.spawnTime` +
+  `Stage` drive the 3s auto-kill; the auto-kill **skips beasts**. A proper
+  seated pose set would make the look real (see below).
 * `magic` uses the horn-blow poses (s1142/s1145); the magic *effect* is still
   unchanged (Ax's volcano).
 
@@ -566,6 +632,13 @@ item at a time, and tick it off here as it is done.
 - [x] Reviewer: **Undo/Redo** stacks with `Ctrl+Z` / `Ctrl+Y` (and `Ctrl+Shift+Z`).
 - [x] Reviewer: removed **Preview all animations**, the JSON textarea and
   `Copy JSON` (Export is the only JSON output).
+- [x] **Player mounting works**: enemy rides → `Y` kills the rider → beast drops
+  to `resting` → mount it. `X` gates the player, `Y` skips beasts (§2/§10).
+- [x] **Boot stage-select** (`scene/StageSelect.java`, `TEST_STAGE_SELECT`): type
+  `1`–`9` + ENTER to start in a stage.
+- [x] **`G` disables the mana/food goblins** (thieves) globally
+  (`TEST_NO_THIEVES`; `Command` SPAWN skips `Thief` and releases its camera lock).
+- [x] Defensive null guard in `Actor.getCurrentFrameColliders()` (see §0 bug).
 
 ### Phase 1 — Shared rectangles (the chosen pain point)
 - [x] **1a.** Reviewer "Rectangles" panel (button in the top bar). Lists every
@@ -612,9 +685,10 @@ item at a time, and tick it off here as it is done.
   small animal-figure sprites — worth a re-check in the reviewer.
 
 ### Phase 4 — Mounted & magic
-- [~] `mounting` / `mounted_*`: restored with stand-in (walking) art and gated
-  by the **X** test toggle to exercise the mount mechanic; still needs a real
-  seated pose set (see §10).
+- [x] `mounting` / `mounted_*`: mounting **works** (player and enemy). Art is a
+  walking-frame stand-in. `Y` kills a mounted rider and releases the beast to
+  `resting`; `X` gates the player's own mounting. A real seated pose set is still
+  wanted for the look (see §10).
 - [ ] `magic` *effect*: pose is done (horn-blow s1142/s1145); decide whether to
   replace Ax's volcano effect (`magic_fire_*.ani`).
 
@@ -626,14 +700,20 @@ item at a time, and tick it off here as it is done.
 - [ ] Select screen: consider a nicer full-body pose (cosmetic).
 
 ### Phase 6 — Robustness & docs
+- [ ] **OPEN BUG:** crash/freeze while riding a dragon (Stage 3) — root cause
+  found and null-guards added; **verify on Stage 3**, and if it recurs find why a
+  mountable actor briefly has no current animation. See §0.
+- [ ] Remove the temporary `mount_debug.log` diagnostics (§0) once the mount /
+  crash work is signed off.
 - [ ] Headless "render every animation" contact sheet + one-command
   "rebuild assets + game" script.
 - [ ] Keep this file current; commit atomically.
 
-### Proposed (not approved)
-- [ ] Game-part testing harness (boot-stage select + wave-skip / god hotkeys
-  behind `TEST_MODE`) — see §10 "Reviewing all game parts". Awaiting a go/no-go;
-  nothing built yet.
+### Proposed / in progress (test tooling)
+- [~] Game-part testing harness (see §10 "Reviewing all game parts"): the
+  **boot-stage select is done** (`scene/StageSelect.java`, `TEST_STAGE_SELECT`)
+  and wave-skip is covered by the **Y** auto-kill. Still unbuilt: god/invincibility
+  + potion keys (`U`/`J`) if wanted.
 
 ### Where an agent can help most
 - Reviewer Rectangles panel + shared-rect highlighting + one-click override (1a).

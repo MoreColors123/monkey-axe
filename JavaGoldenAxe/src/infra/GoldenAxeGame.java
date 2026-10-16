@@ -15,6 +15,7 @@ import scene.OldMap;
 import scene.Ranking;
 import scene.SelectPlayer;
 import scene.Stage;
+import scene.StageSelect;
 import scene.WinnersDontUseDrugs;
 import scene.Title;
 
@@ -57,9 +58,29 @@ public class GoldenAxeGame {
     // (walking frames), so this exists to test the mount mechanic. Toggle
     // in-game with X (see Stage); false = player cannot mount.
     public static boolean TEST_PLAYER_CAN_MOUNT = true;
+    // TEST: when true, thieves ("mana/food goblins") never spawn in any stage.
+    // Toggle in-game with G (see Stage); the switch survives stage changes.
+    public static boolean TEST_NO_THIEVES = false;
+    // TEST: boot into a stage-select prompt where you type the stage number.
+    public static boolean TEST_STAGE_SELECT = true;
     public static PlayerCharacter demoCharacter = GUYBRUSH;
     public static int demoPotionsCount = 2;
     public static int demoStage = 100;
+    
+    // TEST/debug: append a line to mount_debug.log (in the working dir) so mount
+    // diagnostics can be inspected without reading the console.
+    public static void debugLog(String line) {
+        try {
+            java.nio.file.Files.writeString(
+                    java.nio.file.Path.of("mount_debug.log"),
+                    line + System.lineSeparator(),
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.APPEND);
+        }
+        catch (Exception e) {
+            // ignore
+        }
+    }
     
     
     public static void reset() {
@@ -100,6 +121,7 @@ public class GoldenAxeGame {
         sceneManager.addState(new Intro(sceneManager, this));
         sceneManager.addState(new SelectPlayer(sceneManager, this));
         sceneManager.addState(new Stage(sceneManager, this));
+        sceneManager.addState(new StageSelect(sceneManager, this));
         sceneManager.addState(new OldMap(sceneManager, this));
         sceneManager.addState(new Ending(sceneManager, this));
         sceneManager.addState(new Ranking(sceneManager, this));
@@ -109,7 +131,7 @@ public class GoldenAxeGame {
         if (TEST_BOOT_TO_GAME) {
             numberOfPlayers = 1;
             characterPlayer1 = GUYBRUSH;
-            sceneManager.switchTo("stage");
+            sceneManager.switchTo(TEST_STAGE_SELECT ? "stage_select" : "stage");
         }
         else {
             sceneManager.switchTo("initializing");

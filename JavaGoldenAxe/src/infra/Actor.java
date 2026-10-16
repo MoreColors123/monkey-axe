@@ -271,14 +271,12 @@ public class Actor extends Entity implements Comparable<Actor> {
         }
     }
 
-    // TEST/debug: kill this actor immediately (0 energy -> dying). Detaches from
-    // any mount first so a ridden beast is not left player-controlled.
+    // TEST/debug: kill this actor immediately (0 energy -> dying). If it is
+    // riding a beast, unmount it first so the beast is released into its
+    // resting (mountable) state instead of being killed with the rider.
     public void forceKill() {
         if (mountedActor != null) {
-            mountedActor.mountingActor = null;
-            mountedActor.control = Control.NONE;
-            mountedActor.setControlEnabled(false);
-            mountedActor = null;
+            mountedActor.unmount();
         }
         energy = 0;
         if (stateManager.isStateAvailable("dying")) {
@@ -1070,9 +1068,15 @@ public class Actor extends Entity implements Comparable<Actor> {
     }
 
     public List<Collider> getCurrentFrameColliders() {
-        Frame currentFrame = animationPlayer
-                                .getCurrentAnimation().getCurrentFrame();
-
+        // Defensive: an actor can momentarily have no current animation (e.g. a
+        // just-spawned or state-less actor). Callers that iterate colliders
+        // (Stage.checkCollisions, diagnostics) must not NPE on that.
+        Animation animation = animationPlayer != null
+                ? animationPlayer.getCurrentAnimation() : null;
+        if (animation == null) {
+            return new ArrayList<>();
+        }
+        Frame currentFrame = animation.getCurrentFrame();
         return currentFrame.colliders;
     }
     
@@ -1103,6 +1107,15 @@ public class Actor extends Entity implements Comparable<Actor> {
     
     public void react(
             Reaction reaction, Collider sourceCollider, Actor sourceActor) {
+        
+        if (control == Control.PLAYER_1 || control == Control.PLAYER_2) {
+            GoldenAxeGame.debugLog("[react] " + getId() + " reaction=" + reaction
+                    + " from=" + sourceActor.getId()
+                    + " state=" + stateManager.getCurrentState().getName()
+                    + " energy=" + energy
+                    + " wx=" + Math.round(wx) + " wz=" + Math.round(wz)
+                    + " wy=" + Math.round(wy));
+        }
         
         boolean hit = reaction == STUNNED_1 || reaction == STUNNED_2 
                             || reaction == KNOCK_DOWN; 
@@ -1175,11 +1188,22 @@ public class Actor extends Entity implements Comparable<Actor> {
             case MOUNT:
                 String currentStateName = 
                                 stateManager.getCurrentState().getName();
-                // TEST: allow toggling the player's ability to mount (X).
+                // Anyone (player or enemy) can touch-mount a riderless beast, as
+                // in the original. X gates only the player's ability, for
+                // testing. Kill a mounted rider with Y and the beast is released
+                // back to resting (see forceKill).
                 boolean playerRider = control == Control.PLAYER_1 
                                         || control == Control.PLAYER_2;
                 boolean canMount = !playerRider 
                                         || GoldenAxeGame.TEST_PLAYER_CAN_MOUNT;
+                String mountDebug = "[mount] " + getId() + " touched " + sourceActor.getId()
+                        + ": playerRider=" + playerRider
+                        + " flag=" + GoldenAxeGame.TEST_PLAYER_CAN_MOUNT
+                        + " available=" + stateManager.isStateAvailable("mounting")
+                        + " state=" + currentStateName
+                        + " beastBusy=" + (sourceActor.mountingActor != null);
+                System.out.println(mountDebug);
+                GoldenAxeGame.debugLog(mountDebug);
                 
                 if (canMount
                     && stateManager.isStateAvailable("mounting") 

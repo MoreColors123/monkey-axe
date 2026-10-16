@@ -145,7 +145,10 @@ public class Command extends Actor {
                     Terrain.removeBlocker(blockerId);
                 }
                 case SPAWN -> {
-                    if (spawnActor != null) {
+                    // TEST: G disables the mana/food "goblins" (thieves) entirely.
+                    boolean suppressThief = GoldenAxeGame.TEST_NO_THIEVES
+                            && spawnActor instanceof Thief;
+                    if (spawnActor != null && !suppressThief) {
                         stage.addActor(spawnActor);
                         if (spawnActor instanceof Enemy enemy 
                                             && !enemy.isMountable()) {
@@ -153,6 +156,11 @@ public class Command extends Actor {
                             Camera.incActiveEnemyCount();
                         }
                     }        
+                    else if (suppressThief) {
+                        // the thief was registered as a camera-locking actor when
+                        // the command was built; release that lock now.
+                        Camera.removeLockingActor(spawnActor);
+                    }
                 }
                 case ANIMATOR -> {
                     stage.playAnimator(parameters[3], parameters[4]);
